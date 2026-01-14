@@ -1,0 +1,60 @@
+{
+  "compilerOptions": {
+    // ═══════════════════════════════════════════════════════════════════════════
+    // QANTUM PRIME - ENTERPRISE TYPESCRIPT CONFIG
+    // Quick Win #3: Strict Mode Enabled for Type Safety
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STRICT MODE - Enterprise Grade Type Safety
+    // ═══════════════════════════════════════════════════════════════════════════
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CODE QUALITY
+    // Phase 1: Relaxed unused checks (will tighten in Phase 2)
+    // ═══════════════════════════════════════════════════════════════════════════
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MODULE & INTEROP
+    // ═══════════════════════════════════════════════════════════════════════════
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // OUTPUT & DEBUGGING
+    // ═══════════════════════════════════════════════════════════════════════════
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}
