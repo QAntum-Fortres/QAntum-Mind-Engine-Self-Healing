@@ -10,6 +10,7 @@ use tower_http::trace::TraceLayer;
 use tracing::{info, warn};
 use crate::settings::Settings;
 use crate::network::reality::RealityAnchor;
+use crate::network::patcher::RealityPatcher;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -58,6 +59,17 @@ struct RealityStatus {
     integrity: String,
 }
 
+#[derive(Deserialize)]
+struct TuneParams {
+    constant_id: String,
+    value: f64,
+}
+
+#[derive(Deserialize)]
+struct PatchParams {
+    bug_id: String,
+}
+
 pub async fn run_server(settings: Settings) {
     let app = Router::new()
         .route("/telemetry", get(get_telemetry))
@@ -67,6 +79,9 @@ pub async fn run_server(settings: Settings) {
         .route("/readyz", get(readiness_check)) // Readiness
         .route("/manifesto", get(get_manifesto)) // New Physics
         .route("/reality-integrity", get(get_reality_integrity)) // QA
+        .route("/ontology/tune", post(tune_constant))
+        .route("/ontology/patch", post(apply_patch))
+        .route("/entropy/invert", post(invert_entropy))
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
 
@@ -183,4 +198,25 @@ async fn get_reality_integrity() -> Json<RealityStatus> {
         entropy_threshold: anchor.entropy_threshold,
         integrity: "STABLE".into(),
     })
+}
+
+async fn tune_constant(Json(payload): Json<TuneParams>) -> Json<CommandResponse> {
+    // Mock tuning logic
+    let msg = format!("ADJUSTING CONSTANT [{}] TO {:.4e}. LOCAL PHYSICS UPDATED.", payload.constant_id, payload.value);
+    Json(CommandResponse { response: msg })
+}
+
+async fn apply_patch(Json(payload): Json<PatchParams>) -> Json<CommandResponse> {
+    let patcher = RealityPatcher::new();
+    match payload.bug_id.as_str() {
+        "c_limit" => patcher.apply_non_local_presence(),
+        "aging" => patcher.apply_recursive_renewal("HUMANITY"),
+        _ => warn!("UNKNOWN BUG ID"),
+    }
+    let msg = format!("PATCH APPLIED TO BUG ID [{}]", payload.bug_id);
+    Json(CommandResponse { response: msg })
+}
+
+async fn invert_entropy() -> Json<CommandResponse> {
+    Json(CommandResponse { response: "ENTROPY INVERTED. WASTE HEAT RECYCLED INTO PRIMORDIAL SOUP.".into() })
 }

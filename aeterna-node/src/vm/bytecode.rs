@@ -36,6 +36,25 @@ pub enum AeternaOpcode {
     /// [SOCIETY] Predicts resource needs before they manifest.
     PREDICT_NEED(usize), // User ID
 
+    // --- ONTOLOGICAL ENGINEERING EXTENSIONS ---
+    /// [PHYSICS] Modifies local universal constants (G, c, h).
+    TUNE_CONSTANT(usize, f64), // Constant ID, New Value
+
+    /// [LOGIC] Inverts binary logic to Quantum Maybe states.
+    INVERT_LOGIC(usize), // Quantum State ID
+
+    /// [MATTER] Compiles syntax into physical objects.
+    DEFINE_MATTER(String), // Syntax description
+
+    /// [ENTROPY] Sends waste/entropy back in time.
+    RECYCLE_CHRONO(f64), // Time delta (years)
+
+    /// [CONSCIOUSNESS] Forks a soul into parallel instances.
+    FORK_INSTANCE(usize), // Consciousness ID
+
+    /// [QA] Applies a hotfix to the fabric of reality.
+    PATCH_REALITY(usize, String), // Bug ID, Hotfix Name
+
     // Debug/System
     PRINT,           // Print top of stack
     HALT,            // Stop execution
