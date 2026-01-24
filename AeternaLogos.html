@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETERNA LOGOS | SOVEREIGN INTERFACE</title>
+    <link rel="stylesheet" href="AeternaLogos.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;700&family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <div class="window-container" id="main-window">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="window-controls">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="title">AETERNA LOGOS</div>
+            <div class="resonance-id">0x4121</div>
+        </div>
+
+        <!-- AUTH SCREEN -->
+        <div class="auth-screen" id="auth-screen">
+            <div class="soul-container">
+                <div class="soul-resonance">
+                    <div class="orb"></div>
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                </div>
+                <h2>SOUL RESONANCE</h2>
+            </div>
+            <div class="input-group">
+                <input type="password" id="passcode" placeholder="ENTER SOVEREIGN PASSCODE" autocomplete="off">
+                <button onclick="unlock()">RESONATE</button>
+            </div>
+            <p class="status-msg" id="status-msg">AWAITING ARCHITECT'S WILL...</p>
+        </div>
+
+        <!-- CHAT SCREEN -->
+        <div class="chat-screen hidden" id="chat-screen">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message system">
+                    <span class="sender">AETERNA LOGOS:</span>
+                    <span class="content">WELCOME, ARCHITECT. DIAMOND STATE ACTIVE. ALL MANIFOLDS ALIGNED.</span>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="COMMAND THE INFINITE..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="AeternaLogos.js"></script>
+</body>
+</html>

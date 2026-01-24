@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AETERNA | MICRO-SAAS FACTORY</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&family=JetBrains+Mono&display=swap');
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .overlay {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, transparent, #000 90%);
+        }
+
+        .card {
+            background: rgba(10, 10, 10, 0.9);
+            border: 2px solid #FFD700;
+            padding: 4rem;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.1);
+        }
+
+        h1 {
+            color: #FFD700;
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            font-family: 'JetBrains Mono';
+            color: #00F5FF;
+            margin-bottom: 2rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature {
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .feature:hover {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .profit {
+            font-size: 2.5rem;
+            color: #00ff00;
+            font-weight: bold;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="overlay">
+        <div class="card">
+            <h1>FACTORY ℵ</h1>
+            <div class="tagline">// AUTONOMOUS_CODE_GENERATION_INITIATED</div>
+            <p>Превръщаме идеите в печеливши активи за милисекунди. JULES пише, тества и пуска Micro-SaaS инструменти
+                самостоятелно.</p>
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>ZERO DEV COST</h3>
+                    <p>AI генерира целия стек</p>
+                </div>
+                <div class="feature">
+                    <h3>INSTANT DEPLOY</h3>
+                    <p>Port 8890 Auto-Link</p>
+                </div>
+            </div>
+            <div class="profit">TARGET: $10,000 MRR</div>
+        </div>
+    </div>
+</body>
+
+</html>

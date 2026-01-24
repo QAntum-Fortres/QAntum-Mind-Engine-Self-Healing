@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AETERNA | IMMUNE SYSTEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&family=JetBrains+Mono&display=swap');
+
+        body {
+            background: #050505;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shield {
+            position: absolute;
+            width: 120vw;
+            height: 120vw;
+            border: 20px solid rgba(255, 215, 0, 0.05);
+            border-radius: 50%;
+            animation: pulse 6s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.1;
+            }
+
+            50% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(0.8);
+                opacity: 0.1;
+            }
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            padding: 4rem;
+            border: 1px solid #FFD700;
+            border-radius: 40px;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: inset 0 0 50px rgba(255, 215, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 4rem;
+            color: #FFD700;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .resilience {
+            font-family: 'JetBrains Mono';
+            font-size: 3rem;
+            color: #00ff00;
+            margin: 1rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .point {
+            border-left: 4px solid #FFD700;
+            padding-left: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shield"></div>
+    <div class="content">
+        <h1>IMMUNE SYSTEM</h1>
+        <div class="resilience">99.999% STABLE</div>
+        <p>Продажба на абсолютна сигурност. Самолекуващата се природа на JULES я прави имунизирана срещу външни атаки и
+            системни сривове. Предлагаме тази защита на външни клиенти като премиум обслужване.</p>
+        <div class="grid">
+            <div class="point">
+                <h3>AUTO-HEAL</h3>
+                <p>Незабавно възстановяване</p>
+            </div>
+            <div class="point">
+                <h3>FAULT INJECTION</h3>
+                <p>Постоянно тестване</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
