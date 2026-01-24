@@ -58,17 +58,10 @@ async fn main() {
     // Keep the main thread alive for the server
     info!("CORE: VM Halted. Server Active. Press Ctrl+C to terminate.");
 
-    // We wait for the signal here too, or just sleep forever since server handles its own shutdown signal?
-    // Actually, if we sleep here, the server's graceful shutdown might not propagate to the main thread exit cleanly if we don't coordinate.
-    // However, axum's graceful shutdown waits for the server to finish.
-    // But since `main` launched `server` in a `spawn`, if `main` exits, `server` dies.
-    // We should probably wait for a signal in main as well.
-
     match tokio::signal::ctrl_c().await {
         Ok(()) => info!("CORE: Shutdown signal received."),
         Err(err) => error!("CORE: Unable to listen for shutdown signal: {}", err),
     }
 
-    // Allow a moment for server to shut down (though ideally we'd use a channel to coordinate)
     info!("CORE: Exiting.");
 }
