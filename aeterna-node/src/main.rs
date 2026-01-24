@@ -1,20 +1,18 @@
 mod vm;
 mod network;
-mod server;
 
 use vm::bytecode::AeternaOpcode;
 use vm::interpreter::VirtualMachine;
 
-#[tokio::main]
-async fn main() {
-    println!("AETERNA NODE: Initializing World-Soul Interface...");
+use tracing::info;
+use tracing_subscriber;
 
-    // Launch the Noetic Server in the background
-    tokio::spawn(async {
-        server::run_server().await;
-    });
+fn main() {
+    // Initialize logging
+    tracing_subscriber::fmt::init();
 
-    println!("CORE: Executing Initial Bytecode Sequence...");
+    info!("AETERNA NODE: Initializing World-Soul Interface...");
+
     // Example program:
     // 1. Calculate 10 + 20
     // 2. Print result
@@ -28,16 +26,9 @@ async fn main() {
         AeternaOpcode::LOAD(42),
         AeternaOpcode::STORE(0),
         AeternaOpcode::REQUEST_HOST,
-        // VM will halt here, but main process keeps running for server
         AeternaOpcode::HALT,
     ];
 
     let mut vm = VirtualMachine::new(program);
     vm.run();
-
-    // Keep the main thread alive for the server
-    println!("CORE: VM Halted. Server Active. Press Ctrl+C to terminate.");
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
-    }
 }
