@@ -105,6 +105,43 @@ impl VirtualMachine {
                     info!("VM: Halted.");
                     break;
                 }
+
+                // --- AETERNA 2200 HANDLERS ---
+                AeternaOpcode::ONTOLOGICAL_SHIFT(coords) => {
+                     info!("VM: Initiating HLR Transport to coords: {}", coords);
+                }
+                AeternaOpcode::RESONATE_MEMBRANE(freq) => {
+                     info!("VM: Resonating Noetic Membrane at {} Hz", freq);
+                }
+                AeternaOpcode::INVERT_ENTROPY(joules) => {
+                     info!("VM: Harvesting {} J from Quantum Vacuum...", joules);
+                }
+                AeternaOpcode::VERIFY_TIMELINE(hash) => {
+                     info!("VM: Verifying causal consistency of event 0x{:X}...", hash);
+                }
+                AeternaOpcode::PREDICT_NEED(user) => {
+                     info!("VM: Calculating future needs for Entity #{}", user);
+                }
+
+                // --- ONTOLOGICAL HANDLERS ---
+                AeternaOpcode::TUNE_CONSTANT(id, val) => {
+                    info!("VM: Tuning Constant #{} to value {:.4e}", id, val);
+                }
+                AeternaOpcode::INVERT_LOGIC(id) => {
+                    info!("VM: Switching Logic Gate #{} to QUANTUM MAYBE", id);
+                }
+                AeternaOpcode::DEFINE_MATTER(syntax) => {
+                    info!("VM: Compiling Syntax to Matter: '{}'", syntax);
+                }
+                AeternaOpcode::RECYCLE_CHRONO(delta) => {
+                    info!("VM: Sending entropy back {:.2} years.", delta);
+                }
+                AeternaOpcode::FORK_INSTANCE(id) => {
+                    info!("VM: Forking Consciousness #{} into parallel thread.", id);
+                }
+                AeternaOpcode::PATCH_REALITY(bug_id, fix) => {
+                    info!("VM: [QA] Applying Hotfix '{}' to Bug #{}", fix, bug_id);
+                }
             }
         }
     }
