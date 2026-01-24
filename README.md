@@ -603,8 +603,6 @@ Configure GitHub Actions in `.github/workflows/automation.yml`:
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
-
 services:
   qantum-core:
     build: .
@@ -1025,8 +1023,8 @@ For enterprise licensing, custom development, or consulting:
 
 ### Version History
 
-- **v1.0.2** (2025-12-30) - Auto-doc engine + release pipeline
-- **v1.0.1** (2025-12-30) - Auto-doc engine + release pipeline
+- **v1.0.2** (2025-12-30) - Auto-doc engine with Bulgarian language support
+- **v1.0.1** (2025-12-30) - Auto-doc engine + release pipeline  
 - **v1.0.0** (2025-12-15) - Initial production release
 
 ---
