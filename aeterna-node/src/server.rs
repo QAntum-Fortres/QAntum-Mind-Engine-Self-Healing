@@ -130,11 +130,12 @@ async fn health_check() -> Json<HealthCheck> {
     Json(HealthCheck {
         status: "UP".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
-        uptime_seconds: 0,
+        uptime_seconds: 0, // In real app, calculate since start time
     })
 }
 
 async fn readiness_check() -> Json<HealthCheck> {
+    // Check DB connections, etc. here
     Json(HealthCheck {
         status: "READY".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
