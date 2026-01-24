@@ -2,6 +2,7 @@
 
 use super::bytecode::AeternaOpcode;
 use crate::network::teleport::{VMState, teleport_vm_to_host};
+use tracing::{info, warn, error};
 
 pub struct VirtualMachine {
     pub stack: Vec<i64>,
@@ -21,7 +22,7 @@ impl VirtualMachine {
     }
 
     pub fn run(&mut self) {
-        println!("Starting Aeterna VM...");
+        info!("Starting Aeterna VM...");
         while self.pc < self.program.len() {
             let opcode = &self.program[self.pc];
             self.pc += 1;
@@ -35,10 +36,10 @@ impl VirtualMachine {
                         if *addr < self.memory.len() {
                             self.memory[*addr] = val;
                         } else {
-                            println!("Error: Memory access violation at {}", addr);
+                            error!("Memory access violation at {}", addr);
                         }
                     } else {
-                        println!("Error: Stack underflow on STORE");
+                        error!("Stack underflow on STORE");
                     }
                 }
                 AeternaOpcode::ADD => {
@@ -59,8 +60,8 @@ impl VirtualMachine {
                 AeternaOpcode::DIV => {
                     let b = self.stack.pop().unwrap_or(1);
                     if b == 0 {
-                        println!("Error: Division by zero");
-                        self.stack.push(0); // or handle error differently
+                        error!("Division by zero");
+                        self.stack.push(0);
                     } else {
                         let a = self.stack.pop().unwrap_or(0);
                         self.stack.push(a / b);
@@ -77,32 +78,31 @@ impl VirtualMachine {
                     }
                 }
                 AeternaOpcode::SAVE_STATE => {
-                    println!("VM: Saving state...");
+                    info!("VM: Saving state...");
                     let state = self.capture_state();
-                    // In a real scenario, we might return this or send it somewhere.
-                    // For now, we just print a confirmation.
-                    println!("State saved. Checksum: {:?}", state.checksum);
+                    info!("State saved. Checksum: {:?}", state.checksum);
                 }
                 AeternaOpcode::LOAD_STATE => {
-                    println!("VM: Load state not implemented yet.");
+                    warn!("VM: Load state not implemented yet.");
                 }
                 AeternaOpcode::REQUEST_HOST => {
-                    println!("VM: Requesting new host...");
+                    info!("VM: Requesting new host...");
                     let state = self.capture_state();
                     // Arbitrary target host for demo
-                    let _ = teleport_vm_to_host(state, "node-Alpha-Centauri-7");
-                    // In a real migration, we might halt here.
-                    // self.pc = self.program.len();
+                    match teleport_vm_to_host(state, "node-Alpha-Centauri-7") {
+                        Ok(_) => info!("Teleportation successful"),
+                        Err(e) => error!("Teleportation failed: {}", e),
+                    }
                 }
                 AeternaOpcode::PRINT => {
                     if let Some(val) = self.stack.last() {
-                        println!("VM Output: {}", val);
+                        info!("VM Output: {}", val);
                     } else {
-                        println!("VM Output: [Empty Stack]");
+                        warn!("VM Output: [Empty Stack]");
                     }
                 }
                 AeternaOpcode::HALT => {
-                    println!("VM: Halted.");
+                    info!("VM: Halted.");
                     break;
                 }
 
