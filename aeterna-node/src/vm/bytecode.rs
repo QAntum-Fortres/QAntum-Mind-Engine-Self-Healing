@@ -20,6 +20,22 @@ pub enum AeternaOpcode {
     LOAD_STATE,      // Load state from network (placeholder behavior)
     REQUEST_HOST,    // Request a new host for execution
 
+    // --- AETERNA 2200 FUTURIST EXTENSIONS ---
+    /// [TRANSPORT] Rewrites the coordinates of matter in the universal ledger.
+    ONTOLOGICAL_SHIFT(usize),
+
+    /// [BIOLOGY] Induces a neuro-chemical state in the Noetic Membrane.
+    RESONATE_MEMBRANE(usize), // Frequency index
+
+    /// [ENERGY] Harvests energy by locally reversing entropy.
+    INVERT_ENTROPY(usize), // Joules to harvest
+
+    /// [QA] Validates the causal consistency of the current timeline event.
+    VERIFY_TIMELINE(usize), // Hash of the event
+
+    /// [SOCIETY] Predicts resource needs before they manifest.
+    PREDICT_NEED(usize), // User ID
+
     // Debug/System
     PRINT,           // Print top of stack
     HALT,            // Stop execution

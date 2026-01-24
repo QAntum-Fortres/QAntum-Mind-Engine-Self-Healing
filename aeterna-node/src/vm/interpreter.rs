@@ -105,6 +105,23 @@ impl VirtualMachine {
                     println!("VM: Halted.");
                     break;
                 }
+
+                // --- AETERNA 2200 HANDLERS ---
+                AeternaOpcode::ONTOLOGICAL_SHIFT(coords) => {
+                     println!("VM: Initiating HLR Transport to coords: {}", coords);
+                }
+                AeternaOpcode::RESONATE_MEMBRANE(freq) => {
+                     println!("VM: Resonating Noetic Membrane at {} Hz", freq);
+                }
+                AeternaOpcode::INVERT_ENTROPY(joules) => {
+                     println!("VM: Harvesting {} J from Quantum Vacuum...", joules);
+                }
+                AeternaOpcode::VERIFY_TIMELINE(hash) => {
+                     println!("VM: Verifying causal consistency of event 0x{:X}...", hash);
+                }
+                AeternaOpcode::PREDICT_NEED(user) => {
+                     println!("VM: Calculating future needs for Entity #{}", user);
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing::{info, warn};
 use crate::settings::Settings;
+use crate::network::reality::RealityAnchor;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -43,6 +44,20 @@ struct HealthCheck {
     uptime_seconds: u64,
 }
 
+#[derive(Serialize)]
+struct ManifestoSummary {
+    title: String,
+    classification: String,
+    pillars: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct RealityStatus {
+    timeline_hash: String,
+    entropy_threshold: f64,
+    integrity: String,
+}
+
 pub async fn run_server(settings: Settings) {
     let app = Router::new()
         .route("/telemetry", get(get_telemetry))
@@ -50,6 +65,8 @@ pub async fn run_server(settings: Settings) {
         .route("/command", post(handle_command))
         .route("/healthz", get(health_check)) // Liveness
         .route("/readyz", get(readiness_check)) // Readiness
+        .route("/manifesto", get(get_manifesto)) // New Physics
+        .route("/reality-integrity", get(get_reality_integrity)) // QA
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
 
@@ -143,4 +160,27 @@ async fn handle_command(Json(payload): Json<CommandInput>) -> Json<CommandRespon
     };
 
     Json(CommandResponse { response: response.to_string() })
+}
+
+async fn get_manifesto() -> Json<ManifestoSummary> {
+    Json(ManifestoSummary {
+        title: "AETERNA 2200: ARCHITECTURE OF THE POST-MATTER ERA".into(),
+        classification: "OMEGA-RESTRICTED".into(),
+        pillars: vec![
+            "TRANSPORT: Ontological Shift (Holographic Lattice Re-Phasing)".into(),
+            "BIOLOGY: Noetic Membrane (Bio-Linguistic Osmosis)".into(),
+            "ENERGY: Zero-Point Entropy Inversion".into(),
+            "QA: Architecture of Truth (Immutable Reality Consensus)".into(),
+            "SOCIOLOGY: Anticipatory Empathy Grid".into(),
+        ],
+    })
+}
+
+async fn get_reality_integrity() -> Json<RealityStatus> {
+    let anchor = RealityAnchor::new();
+    Json(RealityStatus {
+        timeline_hash: anchor.timeline_hash,
+        entropy_threshold: anchor.entropy_threshold,
+        integrity: "STABLE".into(),
+    })
 }
