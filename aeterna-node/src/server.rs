@@ -6,6 +6,9 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
+use tower_http::trace::TraceLayer;
+use tracing::{info, warn};
+use crate::settings::Settings;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -33,18 +36,79 @@ struct CommandResponse {
     response: String,
 }
 
-pub async fn run_server() {
+#[derive(Serialize)]
+struct HealthCheck {
+    status: String,
+    version: String,
+    uptime_seconds: u64,
+}
+
+pub async fn run_server(settings: Settings) {
     let app = Router::new()
         .route("/telemetry", get(get_telemetry))
         .route("/nervous-system", get(get_modules))
         .route("/command", post(handle_command))
+        .route("/healthz", get(health_check)) // Liveness
+        .route("/readyz", get(readiness_check)) // Readiness
+        .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8890));
-    println!("AETERNA SERVER: Listening on {}", addr);
+    let addr: SocketAddr = format!("{}:{}", settings.server.host, settings.server.port)
+        .parse()
+        .expect("Invalid address format");
+
+    info!("AETERNA SERVER: Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+
+    // Graceful shutdown handling integrated into serve
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    warn!("Signal received, starting graceful shutdown...");
+}
+
+async fn health_check() -> Json<HealthCheck> {
+    Json(HealthCheck {
+        status: "UP".to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        uptime_seconds: 0, // In real app, calculate since start time
+    })
+}
+
+async fn readiness_check() -> Json<HealthCheck> {
+    // Check DB connections, etc. here
+    Json(HealthCheck {
+        status: "READY".to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        uptime_seconds: 0,
+    })
 }
 
 async fn get_telemetry() -> Json<Telemetry> {
