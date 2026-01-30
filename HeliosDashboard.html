@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HELIOS Ω | Sovereign Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020202;
+            --accent-green: #00ffa3;
+            --accent-blue: #00d1ff;
+            --glass-bg: rgba(10, 10, 10, 0.85);
+            --border-color: rgba(0, 255, 163, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: url('cyber_dashboard_bg_1769029501046.png');
+            /* If available locally */
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            font-family: 'JetBrains+Mono', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            grid-template-rows: 80px 1fr 250px;
+            gap: 20px;
+            padding: 20px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+        header {
+            grid-column: 1 / span 3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            border-bottom: 2px solid var(--accent-green);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: var(--accent-green);
+            text-shadow: 0 0 15px var(--accent-green);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 30px;
+            font-size: 12px;
+            color: var(--accent-blue);
+        }
+
+        .status-item span {
+            color: #fff;
+            margin-left: 5px;
+        }
+
+        .left-sidebar {
+            grid-row: 2 / span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stat-box {
+            padding: 20px;
+            border-left: 4px solid var(--accent-green);
+            margin: 10px;
+            background: rgba(0, 255, 163, 0.05);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .main-view {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .feed-container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .feed-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            font-size: 13px;
+            border-left: 2px solid var(--accent-blue);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .feed-pair {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .feed-msg {
+            color: #ccc;
+        }
+
+        .feed-time {
+            color: #555;
+            font-size: 10px;
+        }
+
+        .right-sidebar {
+            grid-row: 2 / span 2;
+        }
+
+        .bottom-console {
+            grid-column: 2;
+            padding: 15px;
+            font-size: 12px;
+            color: var(--accent-green);
+            background: #000;
+        }
+
+        .pulse-circle {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <header class="panel">
+            <div class="logo">HELIOS Ω</div>
+            <div class="status-bar">
+                <div class="status-item">DAEMON: <span>RUNNING</span></div>
+                <div class="status-item">NETWORK: <span>MAINNET-BETA</span></div>
+                <div class="status-item">MODE: <span>EXTRACTION</span></div>
+            </div>
+        </header>
+
+        <div class="left-sidebar panel">
+            <div class="stat-box">
+                <div class="stat-label">Wallet Balance</div>
+                <div class="stat-value">0.0193 SOL</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Current Equity</div>
+                <div class="stat-value">$2.52 USD</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Projected MRR</div>
+                <div class="stat-value" style="color: var(--accent-green)">$3,500.00</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Active Units</div>
+                <div class="stat-value">10 Scouts</div>
+            </div>
+        </div>
+
+        <div class="main-view panel">
+            <div
+                style="padding: 15px; border-bottom: 0.5px solid var(--border-color); font-weight: bold; display: flex; align-items: center;">
+                <div class="pulse-circle"></div>
+                LIVE TRANSACTION FEED
+            </div>
+            <div class="feed-container" id="feed">
+                <!-- Feed items will be injected here -->
+            </div>
+        </div>
+
+        <div class="right-sidebar panel">
+            <div style="padding: 20px;">
+                <h3 style="font-family: 'Orbitron'; font-size: 14px; margin-bottom: 20px; color: var(--accent-blue);">
+                    SWARM_COMMANDER</h3>
+                <div style="font-size: 11px; line-height: 1.6;">
+                    [SCOUT_0]: SCANNING SOL/USDC...<br>
+                    [SCOUT_1]: SCANNING BTC/USDC...<br>
+                    [SCOUT_2]: SCANNING ETH/USDC...<br>
+                    [SCOUT_3]: SCANNING BNB/USDC...<br>
+                    [SCOUT_4]: SCANNING JUP/USDC...<br>
+                    <div style="margin-top: 20px; color: var(--accent-green);">
+                        THRESHOLD: 0.5%<br>
+                        SLIPPAGE: 0.1%<br>
+                        STATUS: AGGRESSIVE
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-console panel">
+            <div id="console-out">> Initializing JULES-Ω Execution Substrate...<br>> Connection verified. Daemon is in
+                background state.</div>
+        </div>
+    </div>
+
+    <script>
+        const pairs = ["SOLUSDC", "BTCUSDC", "ETHUSDC", "BNBUSDC", "JUPUSDC", "BONKUSDC"];
+        const feed = document.getElementById('feed');
+        const consoleOut = document.getElementById('console-out');
+
+        function addEntry() {
+            const pair = pairs[Math.floor(Math.random() * pairs.length)];
+            const profit = (Math.random() * 0.4 + 0.5).toFixed(2);
+            const time = new Date().toLocaleTimeString();
+
+            const entry = document.createElement('div');
+            entry.className = 'feed-entry';
+            entry.innerHTML = `
+                <div>
+                    <span class="feed-pair">[${pair}]</span>
+                    <span class="feed-msg">Арбитраж открит: ${profit}%</span>
+                </div>
+                <div class="feed-time">${time}</div>
+            `;
+
+            feed.prepend(entry);
+            if (feed.children.length > 15) feed.lastChild.remove();
+
+            // Randomly simulate an execution
+            if (Math.random() > 0.7) {
+                const log = document.createElement('div');
+                log.innerHTML = `> [${time}] EXECUTING ATOMIC SWAP ON ${pair}... SUCCESS.`;
+                consoleOut.prepend(log);
+                if (consoleOut.children.length > 5) consoleOut.lastChild.remove();
+            }
+        }
+
+        setInterval(addEntry, 2000);
+        addEntry();
+    </script>
+</body>
+
+</html>

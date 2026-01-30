@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAntum Prime - Antigravity Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border: 1px solid #0f0;
+        }
+
+        .stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border: 1px solid #0f0;
+            min-width: 200px;
+        }
+
+        .stat-item {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .node-alive {
+            fill: #0f0;
+        }
+
+        .node-unknown {
+            fill: #ff0;
+        }
+
+        .node-dead {
+            fill: #f00;
+        }
+
+        .node-core {
+            stroke: #00f;
+            stroke-width: 2px;
+        }
+
+        .node-security {
+            stroke: #f0f;
+            stroke-width: 2px;
+        }
+
+        .node-product {
+            stroke: #0ff;
+            stroke-width: 2px;
+        }
+
+        .link {
+            stroke: #0f0;
+            stroke-opacity: 0.3;
+            stroke-width: 1px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #0f0;
+            padding: 10px;
+            pointer-events: none;
+            display: none;
+            z-index: 2000;
+            font-size: 11px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div class="header">
+            <h1>🌌 ANTIGRAVITY DASHBOARD</h1>
+            <p>QAntum Prime - Live Module Network</p>
+        </div>
+        <div class="stats">
+            <div class="stat-item">Total Modules: <span id="total-modules">0</span></div>
+            <div class="stat-item">🟢 ALIVE: <span id="alive-count">0</span></div>
+            <div class="stat-item">🟡 UNKNOWN: <span id="unknown-count">0</span></div>
+            <div class="stat-item">Core: <span id="core-count">0</span></div>
+            <div class="stat-item">Security: <span id="security-count">0</span></div>
+            <div class="stat-item">Products: <span id="product-count">0</span></div>
+        </div>
+        <svg id="galaxy"></svg>
+        <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <script>
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        const svg = d3.select('#galaxy')
+            .attr('width', width)
+            .attr('height', height);
+
+        const tooltip = d3.select('#tooltip');
+
+        // Load mega-map.json
+        fetch('/mega-map.json')
+            .then(res => res.json())
+            .then(data => {
+                renderGalaxy(data);
+                updateStats(data);
+            });
+
+        function updateStats(modules) {
+            document.getElementById('total-modules').textContent = modules.length;
+            document.getElementById('alive-count').textContent = modules.filter(m => m.status === '🟢 ALIVE').length;
+            document.getElementById('unknown-count').textContent = modules.filter(m => m.status === '🟡 UNKNOWN').length;
+            document.getElementById('core-count').textContent = modules.filter(m => m.type === 'Core').length;
+            document.getElementById('security-count').textContent = modules.filter(m => m.type === 'Security').length;
+            document.getElementById('product-count').textContent = modules.filter(m => m.type === 'Product').length;
+        }
+
+        function renderGalaxy(modules) {
+            // Create nodes
+            const nodes = modules.map(m => ({
+                id: m.id,
+                type: m.type,
+                status: m.status,
+                exports: m.exports,
+                loc: m.loc,
+                path: m.path
+            }));
+
+            // Create simple links (modules of same type attract each other)
+            const links = [];
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < Math.min(i + 3, nodes.length); j++) {
+                    if (nodes[i].type === nodes[j].type) {
+                        links.push({ source: nodes[i].id, target: nodes[j].id });
+                    }
+                }
+            }
+
+            // Force simulation
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-50))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(15));
+
+            // Draw links
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(links)
+                .join('line')
+                .attr('class', 'link');
+
+            // Draw nodes
+            const node = svg.append('g')
+                .selectAll('circle')
+                .data(nodes)
+                .join('circle')
+                .attr('class', d => `node node-${d.status === '🟢 ALIVE' ? 'alive' : d.status === '🟡 UNKNOWN' ? 'unknown' : 'dead'} node-${d.type.toLowerCase()}`)
+                .attr('r', d => Math.min(5 + d.loc / 100, 15))
+                .call(drag(simulation))
+                .on('mouseover', function (event, d) {
+                    tooltip.style('display', 'block')
+                        .html(`
+                            <strong>${d.id}</strong><br/>
+                            Type: ${d.type}<br/>
+                            Status: ${d.status}<br/>
+                            LOC: ${d.loc}<br/>
+                            Exports: ${d.exports.join(', ')}<br/>
+                            <small>${d.path}</small>
+                        `)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function () {
+                    tooltip.style('display', 'none');
+                });
+
+            // Update positions on tick
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+            });
+        }
+
+        function drag(simulation) {
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+
+            return d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended);
+        }
+    </script>
+</body>
+
+</html>

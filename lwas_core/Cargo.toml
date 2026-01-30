@@ -1,0 +1,38 @@
+[workspace]
+
+[package]
+name = "lwas_core"
+version = "1.0.0-SINGULARITY"
+edition = "2024"
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+rayon = "1.11.0"
+subtle = "2.6"
+hashbrown = { version = "0.15", features = ["rayon"] }
+dashmap = { version = "6.1", features = ["rayon"] }
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0.17"
+rand = "0.8.5"
+sys-info = "0.9.1"
+reqwest = { version = "0.13.1", features = ["json"] }
+tower-http = { version = "0.6", features = ["cors"] }
+crossbeam-queue = "0.3"
+tokenizers = "0.20"
+candle-core = "0.8"
+candle-nn = "0.8"
+candle-transformers = "0.8"
+lwas_parser = { path = "../lwas_parser" }
+aeterna-node = { path = "../aeterna-node" }
+chrono = "0.4"
+
+[build-dependencies]
+walkdir = "2"
+
+[[bin]]
+name = "lwas_ignite"
+path = "src/main.rs"

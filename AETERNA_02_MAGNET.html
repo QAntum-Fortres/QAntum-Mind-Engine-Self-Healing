@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AETERNA | MAGNET PROTOCOL</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&family=JetBrains+Mono&display=swap');
+
+        body {
+            background: #050505;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+        }
+
+        .screen {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('magnet_protocol_art.png') no-repeat center center/cover;
+        }
+
+        .scanner {
+            width: 100%;
+            height: 2px;
+            background: #00F5FF;
+            position: absolute;
+            top: 0;
+            animation: scan 4s infinite linear;
+            box-shadow: 0 0 20px #00F5FF;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.85);
+            border-left: 5px solid #00F5FF;
+            padding: 4rem;
+            max-width: 900px;
+            backdrop-filter: blur(15px);
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            color: #00F5FF;
+            text-transform: uppercase;
+        }
+
+        .data-stream {
+            font-family: 'JetBrains Mono';
+            font-size: 0.9rem;
+            color: #00ff00;
+            height: 100px;
+            overflow: hidden;
+            margin: 2rem 0;
+            opacity: 0.6;
+        }
+
+        .action {
+            font-size: 1.5rem;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            padding: 1rem 2rem;
+            display: inline-block;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .action:hover {
+            background: #FFD700;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanner"></div>
+    <div class="screen">
+        <div class="panel">
+            <h1>MAGNET v3.0</h1>
+            <p>Scavenger AI: Извличане на скрит капитал от твоя дигитален субстрат. Никоя ценна информация не остава
+                незабелязана.</p>
+            <div class="data-stream" id="stream"></div>
+            <div class="action">СТАРТИРАЙ ПРОВЕРКА НА 100,000 ФАЙЛА</div>
+        </div>
+    </div>
+    <script>
+        const stream = document.getElementById('stream');
+        setInterval(() => {
+            const line = document.createElement('div');
+            line.innerHTML = `> EXTRACTING_VALUE: 0x${Math.random().toString(16).substring(2, 10).toUpperCase()} | CAPTURED: $${(Math.random() * 100).toFixed(2)}`;
+            stream.prepend(line);
+        }, 500);
+    </script>
+</body>
+
+</html>
