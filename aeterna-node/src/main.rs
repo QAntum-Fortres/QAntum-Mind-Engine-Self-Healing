@@ -1,9 +1,9 @@
-mod vm;
-mod network;
+pub mod compiler;
+pub mod vm;
+pub mod network;
 
-use vm::bytecode::AeternaOpcode;
 use vm::interpreter::VirtualMachine;
-
+use compiler::SoulCompiler;
 use tracing::info;
 use tracing_subscriber;
 
@@ -13,21 +13,17 @@ fn main() {
 
     info!("AETERNA NODE: Initializing World-Soul Interface...");
 
-    // Example program:
-    // 1. Calculate 10 + 20
-    // 2. Print result
-    // 3. Store a value in memory
-    // 4. Initiate Teleportation
-    let program = vec![
-        AeternaOpcode::LOAD(10),
-        AeternaOpcode::LOAD(20),
-        AeternaOpcode::ADD,
-        AeternaOpcode::PRINT,
-        AeternaOpcode::LOAD(42),
-        AeternaOpcode::STORE(0),
-        AeternaOpcode::REQUEST_HOST,
-        AeternaOpcode::HALT,
-    ];
+    // Soul Language Program:
+    // 1. MANIFEST 108 (Sacred number)
+    // 2. ANCHOR 0 (Store in memory)
+    // 3. MANIFEST 42
+    // 4. ANCHOR 1 (Store in memory) - Creating variance/entropy
+    // 5. BECOME VOID (Neutralize entropy)
+    // 6. ECHO (Print result, likely 0 or unity)
+
+    let soul_source = "MANIFEST 108 ANCHOR 0 MANIFEST 42 ANCHOR 1 BECOME VOID ECHO";
+
+    let program = SoulCompiler::compile(soul_source);
 
     let mut vm = VirtualMachine::new(program);
     vm.run();

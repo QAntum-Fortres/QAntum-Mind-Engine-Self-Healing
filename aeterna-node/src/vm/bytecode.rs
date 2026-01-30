@@ -21,6 +21,9 @@ pub enum AeternaOpcode {
     LOAD_STATE,      // Load state from network (placeholder behavior)
     REQUEST_HOST,    // Request a new host for execution
 
+    // Entropy / Soul Operations
+    ENTROPY_RESET,   // Neutralize system entropy (Zero Point / Antigravity)
+
     // Debug/System
     PRINT,           // Print top of stack
     HALT,            // Stop execution
