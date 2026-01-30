@@ -1,0 +1,266 @@
+﻿cargo :    Compiling lwas_core v0.1.0 (C:\Users\papic\Dow
+nloads\RUST-AEGIS\QANTUM-JULES\lwas_core)
+At line:1 char:1
++ cargo build --package lwas_core --package lwas_cli 
+2>&1 | Out-File -F ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   Compilin 
+   g lw...ULES\lwas_core):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+error[E0432]: unresolved import `walkdir`
+ --> lwas_core\src\kernel\magnet.rs:5:5
+  |
+5 | use walkdir::WalkDir;
+  |     ^^^^^^^ use of unresolved module or unlinked 
+crate `walkdir`
+  |
+  = help: if you wanted to use a crate named `walkdir`, 
+use `cargo add walkdir` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `async_trait`
+ --> lwas_core\src\omega\departments.rs:1:5
+  |
+1 | use async_trait::async_trait;
+  |     ^^^^^^^^^^^ use of unresolved module or unlinked 
+crate `async_trait`
+  |
+  = help: if you wanted to use a crate named 
+`async_trait`, use `cargo add async_trait` to add it to 
+your `Cargo.toml`
+
+warning: unused import: `std::path::Path`
+ --> lwas_core\src\kernel\magnet.rs:4:5
+  |
+4 | use std::path::Path;
+  |     ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of 
+`#[warn(unused)]`) on by default
+
+error[E0038]: the trait `Department` is not dyn 
+compatible
+  --> lwas_core\src\omega\departments.rs:53:21
+   |
+53 |         for dept in &self.departments {
+   |                     ^^^^^^^^^^^^^^^^^ `Department` 
+is not dyn compatible
+   |
+note: for a trait to be dyn compatible it needs to allow 
+building a vtable
+      for more information, visit <https://doc.rust-lang.
+org/reference/items/traits.html#dyn-compatibility>
+  --> lwas_core\src\omega\departments.rs:7:14
+   |
+ 5 | pub trait Department: Send + Sync {
+   |           ---------- this trait is not dyn 
+compatible...
+ 6 |     fn name(&self) -> &str;
+ 7 |     async fn initialize(&self) -> Result<(), 
+AeternaError>;
+   |              ^^^^^^^^^^ ...because method 
+`initialize` is `async`
+ 8 |     async fn execute_cycle(&self) -> Result<(), 
+AeternaError>;
+   |              ^^^^^^^^^^^^^ ...because method 
+`execute_cycle` is `async`
+   = help: consider moving `initialize` to another trait
+   = help: consider moving `execute_cycle` to another 
+trait
+   = help: the following types implement `Department`:
+             omega::departments::IntelligenceDept
+             omega::departments::FortressDept
+           consider defining an enum where each variant 
+holds one of these types,
+           implementing `Department` for this new enum 
+and using it instead
+   = note: `Department` may be implemented in other 
+crates; if you want to support your users passing their 
+own types here, you can't refer to a specific type
+
+error[E0038]: the trait `Department` is not dyn 
+compatible
+  --> lwas_core\src\omega\departments.rs:38:30
+   |
+38 |     pub departments: Vec<Box<dyn Department>>,
+   |                              ^^^^^^^^^^^^^^ 
+`Department` is not dyn compatible
+   |
+note: for a trait to be dyn compatible it needs to allow 
+building a vtable
+      for more information, visit <https://doc.rust-lang.
+org/reference/items/traits.html#dyn-compatibility>
+  --> lwas_core\src\omega\departments.rs:7:14
+   |
+ 5 | pub trait Department: Send + Sync {
+   |           ---------- this trait is not dyn 
+compatible...
+ 6 |     fn name(&self) -> &str;
+ 7 |     async fn initialize(&self) -> Result<(), 
+AeternaError>;
+   |              ^^^^^^^^^^ ...because method 
+`initialize` is `async`
+ 8 |     async fn execute_cycle(&self) -> Result<(), 
+AeternaError>;
+   |              ^^^^^^^^^^^^^ ...because method 
+`execute_cycle` is `async`
+   = help: consider moving `initialize` to another trait
+   = help: consider moving `execute_cycle` to another 
+trait
+   = help: the following types implement `Department`:
+             omega::departments::IntelligenceDept
+             omega::departments::FortressDept
+           consider defining an enum where each variant 
+holds one of these types,
+           implementing `Department` for this new enum 
+and using it instead
+   = note: `Department` may be implemented in other 
+crates; if you want to support your users passing their 
+own types here, you can't refer to a specific type
+
+error[E0282]: type annotations needed
+  --> lwas_core\src\kernel\magnet.rs:20:26
+   |
+20 |             .filter_map(|e| e.ok())
+   |                          ^  - type must be known at 
+this point
+   |
+help: consider giving this closure parameter an explicit 
+type
+   |
+20 |             .filter_map(|e: /* Type */| e.ok())
+   |                           ++++++++++++
+
+error[E0282]: type annotations needed
+  --> lwas_core\src\kernel\magnet.rs:21:22
+   |
+21 |             .filter(|e| e.file_type().is_file())
+   |                      ^  - type must be known at 
+this point
+   |
+help: consider giving this closure parameter an explicit 
+type
+   |
+21 |             .filter(|e: /* Type */| 
+e.file_type().is_file())
+   |                       ++++++++++++
+
+error[E0282]: type annotations needed
+  --> lwas_core\src\kernel\magnet.rs:22:22
+   |
+22 |             .filter(|e| {
+   |                      ^
+23 |                 let name = 
+e.file_name().to_string_lossy();
+   |                            - type must be known at 
+this point
+   |
+help: consider giving this closure parameter an explicit 
+type
+   |
+22 |             .filter(|e: /* Type */| {
+   |                       ++++++++++++
+
+error[E0282]: type annotations needed
+  --> lwas_core\src\kernel\magnet.rs:32:19
+   |
+32 |             .map(|entry| {
+   |                   ^^^^^
+33 |                 let path = entry.path();
+   |                            ----- type must be known 
+at this point
+   |
+help: consider giving this closure parameter an explicit 
+type
+   |
+32 |             .map(|entry: /* Type */| {
+   |                        ++++++++++++
+
+error[E0560]: struct `Manifold` has no field named `id`
+  --> lwas_core\src\kernel\magnet.rs:42:21
+   |
+42 |                     id: name.to_string(),
+   |                     ^^ `Manifold` does not have 
+this field
+   |
+   = note: available fields are: `name`, `state`
+
+error[E0560]: struct `Manifold` has no field named 
+`curvature`
+  --> lwas_core\src\kernel\magnet.rs:43:21
+   |
+43 |                     curvature: 1.0,
+   |                     ^^^^^^^^^ `Manifold` does not 
+have this field
+   |
+   = note: available fields are: `name`, `state`
+
+error[E0038]: the trait `Department` is not dyn 
+compatible
+  --> lwas_core\src\omega\departments.rs:44:26
+   |
+44 |               departments: vec![
+   |  __________________________^
+45 | |                 Box::new(IntelligenceDept),
+46 | |                 Box::new(FortressDept),
+47 | |             ],
+   | |_____________^ `Department` is not dyn compatible
+   |
+note: for a trait to be dyn compatible it needs to allow 
+building a vtable
+      for more information, visit <https://doc.rust-lang.
+org/reference/items/traits.html#dyn-compatibility>
+  --> lwas_core\src\omega\departments.rs:7:14
+   |
+ 5 | pub trait Department: Send + Sync {
+   |           ---------- this trait is not dyn 
+compatible...
+ 6 |     fn name(&self) -> &str;
+ 7 |     async fn initialize(&self) -> Result<(), 
+AeternaError>;
+   |              ^^^^^^^^^^ ...because method 
+`initialize` is `async`
+ 8 |     async fn execute_cycle(&self) -> Result<(), 
+AeternaError>;
+   |              ^^^^^^^^^^^^^ ...because method 
+`execute_cycle` is `async`
+   = help: consider moving `initialize` to another trait
+   = help: consider moving `execute_cycle` to another 
+trait
+   = help: the following types implement `Department`:
+             omega::departments::IntelligenceDept
+             omega::departments::FortressDept
+           consider defining an enum where each variant 
+holds one of these types,
+           implementing `Department` for this new enum 
+and using it instead
+   = note: `Department` may be implemented in other 
+crates; if you want to support your users passing their 
+own types here, you can't refer to a specific type
+   = note: this error originates in the macro `vec` (in 
+Nightly builds, run with -Z macro-backtrace for more 
+info)
+
+warning: unused import: `rayon::prelude`
+ --> lwas_core\src\memory\vsh.rs:2:5
+  |
+2 | use rayon::prelude::*;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused variable: `waves`
+  --> lwas_core\src\neuro\hud.rs:45:13
+   |
+45 |         let waves = self.waves.clone();
+   |             ^^^^^ help: if this is intentional, 
+prefix it with an underscore: `_waves`
+   |
+   = note: `#[warn(unused_variables)]` (part of 
+`#[warn(unused)]`) on by default
+
+Some errors have detailed explanations: E0038, E0282, 
+E0432, E0560.
+For more information about an error, try `rustc 
+--explain E0038`.
+warning: `lwas_core` (lib) generated 3 warnings
+error: could not compile `lwas_core` (lib) due to 13 
+previous errors; 3 warnings emitted

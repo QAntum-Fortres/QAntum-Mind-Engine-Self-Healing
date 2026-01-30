@@ -1,0 +1,56 @@
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* ~ "\n" }
+
+program = { SOI ~ (statement)* ~ EOI }
+
+statement = {
+    immortal_decl |
+    body_block |
+    spirit_block |
+    manifold_block |
+    resonate_stmt |
+    collapse_stmt |
+    entrench_stmt |
+    magnet_stmt |
+    department_stmt |
+    reflection_stmt |
+    axiom_stmt |
+    causality_stmt
+}
+
+axiom_stmt = { "axiom" ~ identifier ~ ":" ~ string_literal ~ ";" }
+
+causality_stmt = { identifier ~ "causes" ~ identifier ~ "via" ~ causality_type ~ ";" }
+
+causality_type = { "EFFICIENT" | "FORMAL" | "MATERIAL" | "FINAL" | "RETROCAUSAL" | "QUANTUM" | "EMERGENT" | "ACAUSAL" }
+
+immortal_decl = { "immortal" ~ identifier ~ "=" ~ string_literal ~ ";" }
+
+body_block = { "body" ~ identifier ~ "{" ~ text_content ~ "}" }
+
+spirit_block = { "spirit" ~ identifier ~ "{" ~ 
+    "goal:" ~ string_literal ~ 
+    ("," ~ "context:" ~ string_literal)? ~ 
+    "}" 
+}
+
+manifold_block = { "manifold" ~ identifier ~ "{" ~ (statement)* ~ "}" }
+
+resonate_stmt = { "resonate" ~ identifier ~ (number)? ~ ";" }
+
+collapse_stmt = { "collapse" ~ identifier ~ (number)? ~ ";" }
+
+entrench_stmt = { "entrench" ~ identifier ~ (vector | string_literal | number) ~ ";" }
+
+magnet_stmt = { "magnet" ~ string_literal ~ number ~ ";" }
+
+department_stmt = { "department" ~ identifier ~ number ~ ";" }
+
+reflection_stmt = { "reflect" ~ ";" }
+
+identifier = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+number = @{ "-"? ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+vector = { "[" ~ number ~ ("," ~ number)* ~ "]" }
+text_content = @{ (!"}" ~ ANY)* }

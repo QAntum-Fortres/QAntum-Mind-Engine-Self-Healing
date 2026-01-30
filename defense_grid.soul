@@ -1,0 +1,7 @@
+// defense_grid.soul - Active Defense Matrix
+manifold AegisShield { curvature: 0.999 }
+manifold Intruders { curvature: 0.001 }
+
+resonate AegisShield with Intruders
+collapse AegisShield
+entrench AegisShield

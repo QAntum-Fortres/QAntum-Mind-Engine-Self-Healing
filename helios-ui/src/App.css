@@ -1,0 +1,10 @@
+/* Sovereign Core - Reset */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  scrollbar-width: none;
+}
+::-webkit-scrollbar {
+  display: none;
+}
