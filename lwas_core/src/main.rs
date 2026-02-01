@@ -2,20 +2,18 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA
 // STATUS: NOETIC_INTEGRATION_V2
 
-use dotenv::dotenv;
 use lwas_core::omega::binance_bridge::BinanceBridge;
 use lwas_core::omega::listener::AeternaListener;
 use lwas_core::omega::terminal_bridge::TerminalBridge;
 use lwas_core::omega::wealth_bridge::WealthBridge;
 use lwas_core::omega::xenon::ProtocolXenon;
-use lwas_core::SovereignResult;
-use solana_client::rpc_client::RpcClient;
-use solana_sdk::signature::{Keypair, Signer};
+use lwas_core::prelude::SovereignResult;
 use std::env;
 
 #[tokio::main]
 async fn main() -> SovereignResult<()> {
-    dotenv().ok();
+    // Try to load .env file if available
+    let _ = dotenvy::dotenv();
 
     let args: Vec<String> = env::args().collect();
     let is_chat = args.iter().any(|a| a == "--mode") && args.iter().any(|a| a == "chat");
@@ -53,33 +51,22 @@ async fn main() -> SovereignResult<()> {
         Err(_) => println!("⚠️ [BINANCE]: Мостът не е конфигуриран."),
     }
 
-    // 2. Свързване с Solana
-    let rpc_url = "https://api.mainnet-beta.solana.com".to_string();
-    let client = RpcClient::new(rpc_url.clone());
-
-    if let Ok(priv_key_raw) = env::var("SOLANA_PRIVATE_KEY") {
-        let architect_keypair = Keypair::from_base58_string(&priv_key_raw);
-        let public_key = architect_keypair.pubkey();
-
-        println!("📍 [SOLANA_ANCHOR]: {}", public_key);
-
+    // 2. Solana integration is stubbed in this build
+    if let Ok(_priv_key_raw) = env::var("SOLANA_PRIVATE_KEY") {
+        println!("📍 [SOLANA]: Solana integration is disabled in this polymorphic build.");
+        
         if let Ok(sol_price) = WealthBridge::get_real_sol_price().await {
-            if let Ok(balance_lamports) = client.get_balance(&public_key) {
-                let balance_sol = balance_lamports as f64 / 1_000_000_000.0;
-                println!(
-                    "💰 [SOL_LIQUIDITY]: {:.4} SOL (${:.2} USD)",
-                    balance_sol,
-                    balance_sol * sol_price
-                );
-            }
+            println!("💱 [SOL_PRICE]: ${:.2} USD (from Binance API)", sol_price);
         }
 
         if is_reclaim {
-            ProtocolXenon::reclaim_dust(&client, &architect_keypair).await?;
+            ProtocolXenon::reclaim_dust().await?;
         } else {
-            ProtocolXenon::scan_market_pulse(&client).await?;
-            ProtocolXenon::execute_deep_scan(&client, &public_key).await?;
+            ProtocolXenon::scan_market_pulse().await?;
+            ProtocolXenon::execute_deep_scan().await?;
         }
+    } else {
+        println!("⚠️ [SOLANA]: No private key configured.");
     }
 
     println!("--------------------------------------------------");

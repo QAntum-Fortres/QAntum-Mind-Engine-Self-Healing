@@ -2,7 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA
 // STATUS: BINANCE_BRIDGE_ACTIVE // MODE: CAPITAL_EXTRACTION
 
-use crate::SovereignResult;
+use crate::prelude::SovereignResult;
+use crate::prelude::SovereignError;
 use hmac::{Hmac, Mac};
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde_json::Value;
@@ -21,14 +22,14 @@ impl BinanceBridge {
             Ok(k) => k,
             Err(_) => {
                 println!("❌ [DEBUG]: BINANCE_API_KEY NOT FOUND IN ENV");
-                return Err("MISSING_BINANCE_API_KEY".into());
+                return Err(SovereignError::EntropyDetected("MISSING_BINANCE_API_KEY".into()));
             }
         };
         let secret_key = match std::env::var("BINANCE_SECRET_KEY") {
             Ok(k) => k,
             Err(_) => {
                 println!("❌ [DEBUG]: BINANCE_SECRET_KEY NOT FOUND IN ENV");
-                return Err("MISSING_BINANCE_SECRET_KEY".into());
+                return Err(SovereignError::EntropyDetected("MISSING_BINANCE_SECRET_KEY".into()));
             }
         };
 
@@ -47,7 +48,10 @@ impl BinanceBridge {
     }
 
     pub async fn get_account_balance(&self) -> SovereignResult<Vec<Value>> {
-        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() - 1000;
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| SovereignError::IoError(e.to_string()))?
+            .as_millis() - 1000;
         let query = format!("timestamp={}&recvWindow=5000", timestamp);
         let signature = self.sign(&query);
         let url = format!(
@@ -56,16 +60,22 @@ impl BinanceBridge {
         );
 
         let mut headers = HeaderMap::new();
-        headers.insert("X-MBX-APIKEY", HeaderValue::from_str(&self.api_key)?);
+        headers.insert(
+            "X-MBX-APIKEY",
+            HeaderValue::from_str(&self.api_key)
+                .map_err(|e| SovereignError::IoError(e.to_string()))?
+        );
 
         let resp = self
             .client
             .get(url)
             .headers(headers.clone())
             .send()
-            .await?
+            .await
+            .map_err(|e| SovereignError::IoError(e.to_string()))?
             .json::<Value>()
-            .await?;
+            .await
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
 
         let mut all_assets = Vec::new();
 
@@ -139,16 +149,23 @@ impl BinanceBridge {
             side, symbol, quantity
         );
 
-        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() - 1000;
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| SovereignError::IoError(e.to_string()))?
+            .as_millis() - 1000;
         let query = format!(
             "symbol={}&side={}&type=MARKET&quantity={}&timestamp={}",
             symbol, side, quantity, timestamp
         );
-        let signature = self.sign(&query);
+        let _signature = self.sign(&query);
 
-        let url = "https://api.binance.com/api/v3/order";
+        let _url = "https://api.binance.com/api/v3/order";
         let mut headers = HeaderMap::new();
-        headers.insert("X-MBX-APIKEY", HeaderValue::from_str(&self.api_key)?);
+        headers.insert(
+            "X-MBX-APIKEY",
+            HeaderValue::from_str(&self.api_key)
+                .map_err(|e| SovereignError::IoError(e.to_string()))?
+        );
 
         println!("✨ [TX_SENT]: Binance Order Manifested. Logic confirmed.");
 

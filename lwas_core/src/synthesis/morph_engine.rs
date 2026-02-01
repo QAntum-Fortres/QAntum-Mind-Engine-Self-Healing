@@ -1,5 +1,5 @@
 // src/lwas_core/synthesis/morph_engine.rs
-use crate::kernel::VshKernel;
+use crate::kernel::engine::VshKernel;
 use std::sync::Arc;
 
 /// MorphEngine: Позволява на езика Aeterna да модифицира Rust логиката в реално време.
