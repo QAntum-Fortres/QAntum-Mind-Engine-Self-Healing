@@ -149,17 +149,31 @@ impl BinanceBridge {
             side, symbol, quantity
         );
 
+        // NOTE: This is a simulation/dry-run mode for safety.
+        // The signature and URL are prepared but the actual HTTP call is disabled
+        // to prevent accidental real trades during development.
+        
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| SovereignError::IoError(e.to_string()))?
             .as_millis() - 1000;
+        
         let query = format!(
             "symbol={}&side={}&type=MARKET&quantity={}&timestamp={}",
             symbol, side, quantity, timestamp
         );
-        let _signature = self.sign(&query);
+        
+        // Signature prepared for when live trading is enabled
+        let signature = self.sign(&query);
+        println!("📝 [DRY_RUN]: Prepared signature: {}...", &signature[..8]);
 
-        let _url = "https://api.binance.com/api/v3/order";
+        // URL prepared for when live trading is enabled  
+        let url = format!(
+            "https://api.binance.com/api/v3/order?{}&signature={}",
+            query, signature
+        );
+        println!("📝 [DRY_RUN]: Would send to: {}...", &url[..60]);
+
         let mut headers = HeaderMap::new();
         headers.insert(
             "X-MBX-APIKEY",
@@ -167,7 +181,7 @@ impl BinanceBridge {
                 .map_err(|e| SovereignError::IoError(e.to_string()))?
         );
 
-        println!("✨ [TX_SENT]: Binance Order Manifested. Logic confirmed.");
+        println!("✨ [DRY_RUN]: Binance Order simulation complete. Enable live trading to execute.");
 
         Ok(())
     }
