@@ -18,7 +18,10 @@ impl OntologicalBridge {
         };
 
         // 1. Parse .soul to AST
-        let ast = parse_soul(&content);
+        let ast = match parse_soul(&content) {
+            Ok(a) => a,
+            Err(e) => return format!("PARSE_ERROR: {:?}", e),
+        };
 
         // 2. Compile AST to Bytecode
         let bytecode = SoulCompiler::compile(ast);

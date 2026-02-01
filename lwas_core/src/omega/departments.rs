@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use async_trait::async_trait;
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait Department: Send + Sync {
     fn name(&self) -> &str;
     async fn initialize(&self) -> SovereignResult<()>;
@@ -9,7 +9,7 @@ pub trait Department: Send + Sync {
 }
 
 pub struct IntelligenceDept;
-#[async_trait]
+#[async_trait(?Send)]
 impl Department for IntelligenceDept {
     fn name(&self) -> &str { "Intelligence" }
     async fn initialize(&self) -> SovereignResult<()> {
@@ -22,7 +22,7 @@ impl Department for IntelligenceDept {
 }
 
 pub struct FortressDept;
-#[async_trait]
+#[async_trait(?Send)]
 impl Department for FortressDept {
     fn name(&self) -> &str { "Fortress" }
     async fn initialize(&self) -> SovereignResult<()> {
