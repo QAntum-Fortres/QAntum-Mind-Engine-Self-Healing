@@ -56,6 +56,9 @@ pub enum AeternaOpcode {
     /// [QA] Applies a hotfix to the fabric of reality.
     PATCH_REALITY(usize, String), // Bug ID, Hotfix Name
 
+    /// [ENTROPY] Resets entropy to zero, restoring order.
+    ENTROPY_RESET,
+
     // Debug/System
     PRINT,           // Print top of stack
     HALT,            // Stop execution

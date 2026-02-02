@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lwas_core = { path = "../../AETERNA-PRIVATE/lwas_core" }
 pest = "2.6"
 pest_derive = "2.6"
 thiserror = "1.0"

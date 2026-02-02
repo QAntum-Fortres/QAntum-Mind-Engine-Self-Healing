@@ -1,12 +1,11 @@
 // lwas_core/src/omega/wealth_bridge.rs
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA
-// STATUS: PHYSICAL_EXTRACTION // MODE: REAL_DATA
+// STATUS: STUB_MODE // NOTE: Solana integration disabled for polymorphic build
 
 use serde::Deserialize;
-use solana_client::rpc_client::RpcClient;
-use solana_sdk::pubkey::Pubkey;
-use crate::SovereignResult;
+use crate::prelude::SovereignResult;
 
+/// Wealth Bridge - Economic data and asset management
 pub struct WealthBridge;
 
 #[derive(Deserialize, Debug)]
@@ -16,23 +15,37 @@ struct BinancePrice {
 }
 
 impl WealthBridge {
+    /// Get real SOL price from Binance API
     pub async fn get_real_sol_price() -> SovereignResult<f64> {
         let url = "https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDC";
-        let resp = reqwest::get(url).await?.json::<BinancePrice>().await?;
-        let price: f64 = resp.price.parse()?;
-        Ok(price)
+        let client = reqwest::Client::new();
+        match client.get(url).send().await {
+            Ok(resp) => match resp.json::<BinancePrice>().await {
+                Ok(data) => {
+                    let price: f64 = data.price.parse().unwrap_or(0.0);
+                    Ok(price)
+                }
+                Err(_) => {
+                    println!("⚠️ [WEALTH]: Unable to parse price data, using fallback.");
+                    Ok(0.0)
+                }
+            },
+            Err(_) => {
+                println!("⚠️ [WEALTH]: Network error, using fallback price.");
+                Ok(0.0)
+            }
+        }
     }
 
-    pub async fn calculate_total_equity(client: &RpcClient, public_key: &Pubkey) -> SovereignResult<f64> {
-        let balance_lamports = client.get_balance(public_key)?;
-        let balance_sol = balance_lamports as f64 / 1_000_000_000.0;
-        let sol_price = Self::get_real_sol_price().await?;
-        Ok(balance_sol * sol_price)
+    /// Stub: Calculate total equity (Solana integration disabled)
+    pub async fn calculate_total_equity() -> SovereignResult<f64> {
+        println!("📊 [WEALTH]: Solana balance check disabled in this build.");
+        Ok(0.0)
     }
 
-    pub async fn report_status(client: &RpcClient, public_key: &Pubkey) -> SovereignResult<()> {
-        let equity = Self::calculate_total_equity(client, public_key).await?;
-        println!("📊 [WEALTH_REPORT]: Твоят капитал в субстрата е: ${:.2} USD", equity);
+    /// Stub: Report status
+    pub async fn report_status() -> SovereignResult<()> {
+        println!("📊 [WEALTH_REPORT]: Solana integration disabled.");
         Ok(())
     }
 }

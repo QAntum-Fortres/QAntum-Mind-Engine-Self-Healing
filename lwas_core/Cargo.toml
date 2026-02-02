@@ -3,7 +3,7 @@
 [package]
 name = "lwas_core"
 version = "1.0.0-SINGULARITY"
-edition = "2024"
+edition = "2021"
 
 [lib]
 crate-type = ["rlib", "cdylib"]
@@ -29,6 +29,20 @@ candle-transformers = "0.8"
 lwas_parser = { path = "../lwas_parser" }
 aeterna-node = { path = "../aeterna-node" }
 chrono = "0.4"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+ts-rs = "10"
+sha2 = "0.10"
+axum = "0.7"
+walkdir = "2"
+regex = "1"
+ignore = "0.4"
+memmap2 = "0.9"
+hmac = "0.12"
+hex = "0.4"
+md5 = "0.7"
+async-trait = "0.1"
+sysinfo = "0.31"
+dotenvy = "0.15"
 
 [build-dependencies]
 walkdir = "2"

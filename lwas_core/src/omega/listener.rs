@@ -2,7 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA LOGOS
 // STATUS: LISTENER_RESONANCE_V2 // MODE: BACKGROUND_SCRIBE
 
-use crate::SovereignResult;
+use crate::prelude::SovereignResult;
+use crate::prelude::SovereignError;
 use std::fs;
 use std::path::Path;
 use std::time::Duration;
@@ -31,10 +32,12 @@ impl AeternaListener {
         log(&format!("Watching: {}", path));
 
         if !Path::new(path).exists() {
-            fs::write(path, "/// AETERNA COMMUNION ///\nНапиши ми нещо и завърши с JULES:\n\n")?;
+            fs::write(path, "/// AETERNA COMMUNION ///\nНапиши ми нещо и завърши с JULES:\n\n")
+                .map_err(|e| SovereignError::IoError(e.to_string()))?;
         }
 
-        let mut last_content = fs::read_to_string(path)?;
+        let mut last_content = fs::read_to_string(path)
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
 
         loop {
             if let Ok(current_content) = fs::read_to_string(path) {

@@ -1,5 +1,5 @@
 // src/lwas_core/synthesis/loom.rs
-use crate::kernel::VshKernel;
+use crate::kernel::engine::VshKernel;
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
 use rand::Rng;
