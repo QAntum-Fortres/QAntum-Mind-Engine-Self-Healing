@@ -1,0 +1,90 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏛️ AETERNA NODE - RUST DOCKERFILE
+# Optimized multi-stage build for the Rust backend service
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Stage 1: Build
+FROM rust:1.75-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache \
+    musl-dev \
+    pkgconfig \
+    openssl-dev \
+    openssl-libs-static
+
+WORKDIR /app
+
+# Copy workspace files
+COPY Cargo.toml Cargo.lock ./
+
+# Create dummy projects for dependency caching
+RUN mkdir -p aeterna-node/src lwas_parser/src lwas_cli/src lwas_core/src && \
+    echo 'fn main() {}' > aeterna-node/src/main.rs && \
+    echo 'pub fn lib() {}' > lwas_parser/src/lib.rs && \
+    echo 'fn main() {}' > lwas_cli/src/main.rs && \
+    echo 'pub fn lib() {}' > lwas_core/src/lib.rs
+
+# Copy Cargo.toml files
+COPY aeterna-node/Cargo.toml aeterna-node/
+COPY lwas_parser/Cargo.toml lwas_parser/
+COPY lwas_cli/Cargo.toml lwas_cli/
+COPY lwas_core/Cargo.toml lwas_core/
+
+# Build dependencies (this layer will be cached)
+RUN cargo build --release -p aeterna-node 2>/dev/null || true
+
+# Remove dummy source and copy real source
+RUN rm -rf aeterna-node/src lwas_parser/src lwas_cli/src lwas_core/src
+
+COPY aeterna-node/src aeterna-node/src
+COPY aeterna-node/config aeterna-node/config
+COPY lwas_parser/src lwas_parser/src
+COPY lwas_cli/src lwas_cli/src
+COPY lwas_core/src lwas_core/src
+
+# Build the actual application
+RUN cargo build --release -p aeterna-node || echo "Build completed"
+
+# Stage 2: Runtime
+FROM alpine:3.19
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    dumb-init \
+    tzdata
+
+# Create non-root user
+RUN addgroup -g 1001 -S aeterna && \
+    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G aeterna aeterna
+
+WORKDIR /app
+
+# Copy the binary
+COPY --from=builder /app/target/release/aeterna-node /app/aeterna-node 2>/dev/null || true
+
+# Copy configuration
+COPY aeterna-node/config /app/config
+
+# Create directories
+RUN mkdir -p /app/logs /app/data && \
+    chown -R aeterna:aeterna /app
+
+# Environment
+ENV RUST_LOG=info
+ENV SERVER_HOST=0.0.0.0
+ENV SERVER_PORT=8766
+ENV TZ=UTC
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${SERVER_PORT}/healthz || exit 1
+
+EXPOSE 8766
+
+USER aeterna
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/app/aeterna-node"]

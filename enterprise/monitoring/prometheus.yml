@@ -1,0 +1,120 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏛️ QANTUM MIND ENGINE - PROMETHEUS CONFIGURATION
+# Enterprise monitoring with custom metrics and alerting rules
+# ═══════════════════════════════════════════════════════════════════════════════
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'qantum-production'
+    env: 'production'
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Alertmanager Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Rule Files
+# ═══════════════════════════════════════════════════════════════════════════════
+
+rule_files:
+  # - "alerts/*.yml"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Scrape Configurations
+# ═══════════════════════════════════════════════════════════════════════════════
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+    scheme: http
+
+  # QAntum Core Metrics
+  - job_name: 'qantum-core'
+    static_configs:
+      - targets: ['qantum-core:9090']
+        labels:
+          service: 'qantum-core'
+          component: 'backend'
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Aeterna Node Metrics
+  - job_name: 'aeterna-node'
+    static_configs:
+      - targets: ['aeterna-node:8766']
+        labels:
+          service: 'aeterna-node'
+          component: 'rust-backend'
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 15s
+
+  # API Gateway (NGINX)
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['gateway:80']
+        labels:
+          service: 'gateway'
+          component: 'nginx'
+    metrics_path: /stub_status
+    scheme: http
+
+  # PostgreSQL Exporter (if deployed)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+        labels:
+          service: 'postgres'
+          component: 'database'
+    metrics_path: /metrics
+    scheme: http
+
+  # Redis Exporter (if deployed)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          service: 'redis'
+          component: 'cache'
+    metrics_path: /metrics
+    scheme: http
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: []
+        # - node-exporter:9100
+    metrics_path: /metrics
+    scheme: http
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Recording Rules (Pre-computed metrics for dashboards)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# These would be in separate rule files in production:
+#
+# groups:
+#   - name: qantum-aggregations
+#     interval: 30s
+#     rules:
+#       - record: job:qantum_requests_total:rate5m
+#         expr: sum(rate(qantum_http_requests_total[5m])) by (job)
+#
+#       - record: job:qantum_request_duration_seconds:p95
+#         expr: histogram_quantile(0.95, sum(rate(qantum_http_request_duration_seconds_bucket[5m])) by (le, job))
+#
+#       - record: job:qantum_error_rate:rate5m
+#         expr: sum(rate(qantum_http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(qantum_http_requests_total[5m])) by (job)
