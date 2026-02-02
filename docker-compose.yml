@@ -1,0 +1,265 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏛️ QANTUM MIND ENGINE - ENTERPRISE DOCKER COMPOSE
+# Full-stack orchestration with production-grade services
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Core Application Services
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  qantum-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qantum-mind-core
+    restart: unless-stopped
+    ports:
+      - "8765:8765"   # WebSocket/HTTP API
+      - "9090:9090"   # Metrics
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://qantum:qantum_secret@postgres:5432/qantum_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-qantum_jwt_secret_change_in_production}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - LOG_LEVEL=info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - qantum-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8765/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - qantum-logs:/app/logs
+      - qantum-data:/app/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  aeterna-node:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+    container_name: aeterna-node
+    restart: unless-stopped
+    ports:
+      - "8766:8766"   # Rust API Server
+    environment:
+      - RUST_LOG=info
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8766
+      - DATABASE_URL=postgresql://qantum:qantum_secret@postgres:5432/qantum_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - qantum-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8766/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # API Gateway (NGINX)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  gateway:
+    image: nginx:alpine
+    container_name: qantum-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./enterprise/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./enterprise/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./enterprise/ssl:/etc/nginx/ssl:ro
+      - gateway-cache:/var/cache/nginx
+    depends_on:
+      - qantum-core
+      - aeterna-node
+    networks:
+      - qantum-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Database Services
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: qantum-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=qantum
+      - POSTGRES_PASSWORD=qantum_secret
+      - POSTGRES_DB=qantum_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./enterprise/db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - qantum-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qantum -d qantum_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  redis:
+    image: redis:7-alpine
+    container_name: qantum-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - qantum-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Observability Stack
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: qantum-prometheus
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./enterprise/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - qantum-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: qantum-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-qantum_admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./enterprise/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./enterprise/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - qantum-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Message Queue (Optional - for async processing)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: qantum-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=qantum
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-qantum_mq}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - qantum-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Networks
+# ═══════════════════════════════════════════════════════════════════════════════
+
+networks:
+  qantum-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Volumes
+# ═══════════════════════════════════════════════════════════════════════════════
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  rabbitmq-data:
+    driver: local
+  qantum-logs:
+    driver: local
+  qantum-data:
+    driver: local
+  gateway-cache:
+    driver: local

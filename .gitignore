@@ -47,3 +47,26 @@ brain-map.json
 # Archives
 *.zip
 *.tar.gz
+
+# Docker
+*.pid
+
+# SSL certificates (keep templates)
+enterprise/ssl/*.pem
+enterprise/ssl/*.key
+enterprise/ssl/*.crt
+!enterprise/ssl/.gitkeep
+
+# Local data volumes
+data/
+postgres-data/
+redis-data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Editor backup files
+*~
+\#*\#
