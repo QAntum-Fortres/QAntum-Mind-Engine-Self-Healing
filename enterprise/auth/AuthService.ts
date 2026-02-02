@@ -161,21 +161,29 @@ export class AuthService {
   }
 
   /**
-   * Hash a password using bcrypt-like algorithm (using native crypto)
+   * Hash a password using PBKDF2 (async version for production)
    */
   async hashPassword(password: string): Promise<string> {
     const salt = crypto.randomBytes(16).toString('hex');
-    const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
-    return `${salt}:${hash}`;
+    return new Promise((resolve, reject) => {
+      crypto.pbkdf2(password, salt, 100000, 64, 'sha512', (err, derivedKey) => {
+        if (err) reject(err);
+        else resolve(`${salt}:${derivedKey.toString('hex')}`);
+      });
+    });
   }
 
   /**
-   * Verify a password against a hash
+   * Verify a password against a hash (async version)
    */
   async verifyPassword(password: string, storedHash: string): Promise<boolean> {
     const [salt, hash] = storedHash.split(':');
-    const verifyHash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
-    return hash === verifyHash;
+    return new Promise((resolve, reject) => {
+      crypto.pbkdf2(password, salt, 100000, 64, 'sha512', (err, derivedKey) => {
+        if (err) reject(err);
+        else resolve(hash === derivedKey.toString('hex'));
+      });
+    });
   }
 
   /**

@@ -21,6 +21,10 @@ on:
           - staging
           - production
 
+# Default minimal permissions
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: '20'
   RUST_VERSION: '1.75'
@@ -35,6 +39,8 @@ jobs:
   quality-checks:
     name: Code Quality
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,15 +57,15 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Run ESLint
-        run: npm run lint || true
+        run: npm run lint
         continue-on-error: true
 
       - name: Check TypeScript
-        run: npx tsc --noEmit || true
+        run: npx tsc --noEmit
         continue-on-error: true
 
       - name: Security audit
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
         continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════════
@@ -70,6 +76,8 @@ jobs:
     name: Build Node.js
     runs-on: ubuntu-latest
     needs: quality-checks
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -103,6 +111,8 @@ jobs:
     name: Build Rust
     runs-on: ubuntu-latest
     needs: quality-checks
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -139,6 +149,8 @@ jobs:
     name: Build Frontend
     runs-on: ubuntu-latest
     needs: quality-checks
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -220,6 +232,8 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [build-node, build-frontend]
+    permissions:
+      contents: read
     services:
       postgres:
         image: postgres:16-alpine
@@ -273,6 +287,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker-build
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -301,6 +318,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker-build, integration-tests]
     if: github.ref == 'refs/heads/develop'
+    permissions:
+      contents: read
     environment:
       name: staging
       url: https://staging.qantum.app
@@ -325,6 +344,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker-build, integration-tests, security-scan]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
     environment:
       name: production
       url: https://qantum.app

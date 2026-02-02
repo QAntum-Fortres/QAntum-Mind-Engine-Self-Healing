@@ -310,7 +310,35 @@ npm run build
 
 ### Running the System
 
-#### Option 1: Docker Deployment (Recommended for Production)
+#### Option 1: Enterprise Docker Deployment (Recommended for Production) 🆕
+
+```bash
+# Quick start with startup script
+./start.sh start prod
+
+# Or manual Docker Compose
+docker-compose up -d
+
+# Access services:
+# - API Gateway: http://localhost:80
+# - QAntum Core API: http://localhost:8765
+# - Aeterna Node (Rust): http://localhost:8766
+# - Grafana Dashboard: http://localhost:3001 (admin/qantum_admin)
+# - Prometheus Metrics: http://localhost:9091
+# - RabbitMQ Management: http://localhost:15672
+```
+
+**Enterprise Stack includes:**
+- ✅ NGINX API Gateway with rate limiting and security headers
+- ✅ PostgreSQL 16 database with full schema
+- ✅ Redis 7 for caching and session management
+- ✅ Prometheus + Grafana for monitoring
+- ✅ RabbitMQ for async messaging
+- ✅ JWT authentication with RBAC
+- ✅ Health checks and graceful shutdown
+- ✅ CI/CD with GitHub Actions
+
+#### Option 2: Legacy Docker Deployment
 
 ```bash
 docker-compose up -d
@@ -321,7 +349,7 @@ docker-compose up -d
 # - OmniCore WebSocket: ws://localhost:8765
 ```
 
-#### Option 2: Local Development
+#### Option 3: Local Development
 
 **Terminal 1 - TypeScript Core:**
 ```bash

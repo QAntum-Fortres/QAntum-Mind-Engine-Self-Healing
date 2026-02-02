@@ -21,7 +21,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://qantum:qantum_secret@postgres:5432/qantum_db
       - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET:-qantum_jwt_secret_change_in_production}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - LOG_LEVEL=info
     depends_on:

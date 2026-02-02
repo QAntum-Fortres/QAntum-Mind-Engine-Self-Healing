@@ -15,9 +15,9 @@ datasources:
     type: postgres
     url: postgres:5432
     database: qantum_db
-    user: qantum
+    user: ${GF_DATASOURCE_POSTGRES_USER:qantum}
     secureJsonData:
-      password: qantum_secret
+      password: ${GF_DATASOURCE_POSTGRES_PASSWORD}
     jsonData:
       sslmode: disable
       maxOpenConns: 0

@@ -52,7 +52,10 @@ check_requirements() {
 load_env() {
     if [ -f .env ]; then
         echo -e "${YELLOW}Loading environment from .env${NC}"
-        export $(cat .env | grep -v '^#' | xargs)
+        # Use safer method to load env vars
+        set -a
+        source .env
+        set +a
     elif [ -f .env.example ]; then
         echo -e "${YELLOW}Creating .env from .env.example${NC}"
         cp .env.example .env

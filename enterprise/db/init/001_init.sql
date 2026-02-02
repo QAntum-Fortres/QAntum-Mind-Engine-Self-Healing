@@ -279,12 +279,14 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO qantum_ap
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO qantum_app;
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- SEED DATA (Development Only)
+-- SEED DATA (Development Only - Remove in Production)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
--- Create admin user (password: admin123 - CHANGE IN PRODUCTION)
-INSERT INTO users (email, password_hash, username, role, status) VALUES
-    ('admin@qantum.local', crypt('admin123', gen_salt('bf')), 'admin', 'admin', 'active')
-ON CONFLICT (email) DO NOTHING;
+-- NOTE: In production, create admin user via secure initialization script
+-- DO NOT use default passwords in production environments
+-- Example production setup:
+--   docker exec -it qantum-postgres psql -U qantum -d qantum_db -c \
+--     "INSERT INTO users (email, password_hash, username, role, status) \
+--      VALUES ('admin@your-domain.com', crypt('YOUR_SECURE_PASSWORD', gen_salt('bf')), 'admin', 'admin', 'active');"
 
 COMMIT;

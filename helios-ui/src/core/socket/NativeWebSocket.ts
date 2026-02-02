@@ -87,12 +87,37 @@ export class NativeWebSocket {
             try {
                 const data = JSON.parse(event.data);
 
-                // 🛡️ VERITAS VALIDATION
+                // Handle different message types from enterprise server
+                if (data.type === 'welcome') {
+                    console.log("[NEURAL LINK] 🎉 Welcome message received:", data.message);
+                    return;
+                }
+
+                if (data.type === 'heartbeat') {
+                    // Enterprise server heartbeat format - transform to OmniPayload
+                    const omniData: OmniPayload = {
+                        timestamp: data.timestamp,
+                        entropy: data.entropy || 0,
+                        orchestrator: data.orchestrator || 'ENTERPRISE_SERVER',
+                        bio: { stress: data.systemHealth ? 1 - data.systemHealth : 0.1, action: 'HEALTHY' },
+                        market: { stress: 0.2, action: 'STABLE' },
+                        energy: { stress: 0.1, action: 'OPTIMAL' }
+                    };
+                    useSovereignStore.getState().updateMetrics(omniData);
+                    return;
+                }
+
+                if (data.type === 'chat_response') {
+                    console.log("[NEURAL LINK] 💬 Chat response:", data.content);
+                    return;
+                }
+
+                // Legacy OmniCore format - 🛡️ VERITAS VALIDATION
                 const verification = this.veritas.verify('omni-payload', data);
                 if (!verification.valid) return; // Reject hallucination
 
                 if (data.entropy === 0) {
-                    console.warn("[NEURAL LINK] ⚠️ Entropy is 0.00. Check Rust backend connection.");
+                    console.warn("[NEURAL LINK] ⚠️ Entropy is 0.00. Check backend connection.");
                 }
 
                 // Update State
