@@ -1,7 +1,6 @@
 // aeterna-node/src/vm/bytecode.rs
-use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 #[allow(non_camel_case_types)]
 pub enum AeternaOpcode {
     // Basic Operations

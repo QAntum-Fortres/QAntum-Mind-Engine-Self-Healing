@@ -11,6 +11,10 @@ use tracing::{info, warn};
 use crate::settings::Settings;
 use crate::network::reality::RealityAnchor;
 use crate::network::patcher::RealityPatcher;
+use crate::vm::soul_parser::{SoulParser, SoulToken};
+use crate::vm::sovereign::SovereignRuntime;
+use crate::vm::physics_override::UniversalConstantTuner;
+use crate::vm::ouroboros::Ouroboros;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -70,6 +74,12 @@ struct PatchParams {
     bug_id: String,
 }
 
+#[derive(Deserialize)]
+struct SoulScript {
+    code: String,
+    signature: String,
+}
+
 pub async fn run_server(settings: Settings) {
     let app = Router::new()
         .route("/telemetry", get(get_telemetry))
@@ -82,6 +92,9 @@ pub async fn run_server(settings: Settings) {
         .route("/ontology/tune", post(tune_constant))
         .route("/ontology/patch", post(apply_patch))
         .route("/entropy/invert", post(invert_entropy))
+        .route("/soul/execute", post(execute_soul_v2)) // SOUL V2 Interface
+        .route("/physics/override", post(override_physics)) // UCT
+        .route("/ouroboros/cycle", post(trigger_ouroboros)) // Loop
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
 
@@ -219,4 +232,35 @@ async fn apply_patch(Json(payload): Json<PatchParams>) -> Json<CommandResponse> 
 
 async fn invert_entropy() -> Json<CommandResponse> {
     Json(CommandResponse { response: "ENTROPY INVERTED. WASTE HEAT RECYCLED INTO PRIMORDIAL SOUP.".into() })
+}
+
+async fn execute_soul_v2(Json(payload): Json<SoulScript>) -> Json<CommandResponse> {
+    info!("SERVER: Received SOUL V2 Script with Signature: [{}]", payload.signature);
+
+    // 1. Parse SOUL Code
+    let mut parser = SoulParser::new(&payload.code);
+    let opcodes = parser.parse();
+
+    // 2. Initialize Sovereign Runtime
+    let mut runtime = SovereignRuntime::new(payload.signature, opcodes);
+
+    // 3. Execute with Authority Check
+    match runtime.execute_with_authority() {
+        Ok(_) => Json(CommandResponse { response: "SOUL V2 EXECUTION SUCCESSFUL. LOGIC IMMORTALIZED.".into() }),
+        Err(e) => Json(CommandResponse { response: format!("SOUL V2 FAILURE: {}", e) }),
+    }
+}
+
+async fn override_physics(Json(payload): Json<TuneParams>) -> Json<CommandResponse> {
+    let mut uct = UniversalConstantTuner::new();
+    // In a real system, we'd persist this change.
+    uct.apply_patch(payload.value, 3.0e8); // Assuming payload.value targets G for now
+    Json(CommandResponse { response: format!("PHYSICS OVERRIDE: {} set to {}", payload.constant_id, payload.value) })
+}
+
+async fn trigger_ouroboros() -> Json<CommandResponse> {
+    let mut ouroboros = Ouroboros::new();
+    ouroboros.activate();
+    ouroboros.on_entropy_detected(5000.0); // Simulate waste heat
+    Json(CommandResponse { response: "OUROBOROS CYCLE COMPLETE. ENERGY RECYCLED.".into() })
 }

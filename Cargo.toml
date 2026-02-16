@@ -1,7 +1,0 @@
-[workspace]
-members = [
-    "lwas_parser",
-    "lwas_cli",
-    "helios-ui/src-tauri",
-]
-resolver = "2"

@@ -3,6 +3,7 @@ mod network;
 mod server;
 mod settings;
 
+use vm::bytecode::AeternaOpcode;
 use vm::interpreter::VirtualMachine;
 use settings::Settings;
 use tracing::{info, error};
