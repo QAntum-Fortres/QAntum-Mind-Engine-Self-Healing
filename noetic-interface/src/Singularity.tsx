@@ -114,26 +114,36 @@ const TheVoid = ({ entropy }: { entropy: number }) => {
 
 // 2. THE NERVOUS SYSTEM (Visualization of Modules)
 const OuroborosLoop = ({ entropy }: { entropy: number }) => {
-    const mesh = useRef<THREE.Mesh>(null);
-    useFrame((state) => {
-        if (mesh.current) {
-            mesh.current.rotation.x = state.clock.getElapsedTime() * 0.5;
-            mesh.current.rotation.y = state.clock.getElapsedTime() * 0.2;
-            const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2.0) * entropy * 0.5;
-            mesh.current.scale.set(scale, scale, scale);
+    const meshRef = useRef<THREE.Points>(null);
 
-            // Pulse color from Red to Gold
-            const hue = 0.1 * (1 - entropy); // 0 (Red) to 0.1 (Orange/Gold)
-            (mesh.current.material as THREE.MeshStandardMaterial).color.setHSL(hue, 1, 0.5);
-            (mesh.current.material as THREE.MeshStandardMaterial).emissive.setHSL(hue, 1, 0.2);
-        }
+    // Calculate color: Red (Chaos) -> Gold (Order)
+    const color = useMemo(() => {
+        const chaos = new THREE.Color(0xff3333);
+        const order = new THREE.Color(0xffd700);
+        return chaos.lerp(order, 1 - entropy);
+    }, [entropy]);
+
+    useFrame((state) => {
+        if (!meshRef.current) return;
+        meshRef.current.rotation.y += 0.005;
+        meshRef.current.rotation.z += 0.002;
+
+        // Pulse synced with entropy
+        const pulse = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1 * entropy;
+        meshRef.current.scale.set(pulse, pulse, pulse);
     });
 
     return (
-        <mesh ref={mesh} position={[0, 5, 0]}>
-            <torusKnotGeometry args={[3, 1, 100, 16]} />
-            <meshStandardMaterial wireframe color="#FF3333" emissive="#550000" />
-        </mesh>
+        <points ref={meshRef} position={[0, 5, 0]} onClick={() => console.log("OUROBOROS TRIGGERED")}>
+            <torusGeometry args={[10, 3, 64, 128]} />
+            <pointsMaterial
+                size={0.05}
+                color={color}
+                transparent
+                opacity={0.8}
+                blending={THREE.AdditiveBlending}
+            />
+        </points>
     );
 };
 
@@ -334,67 +344,76 @@ const PhysicsOverrideControl = () => {
 
     return (
         <motion.div
-            className="fixed top-10 left-10 w-64 bg-black/90 border-2 border-orange-500/50 p-4 text-orange-500 font-mono"
+            className="fixed top-10 left-10 w-72 p-6 bg-black/80 border border-zinc-800 rounded-lg backdrop-blur-md text-orange-500 font-mono shadow-[0_0_20px_rgba(255,165,0,0.2)]"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
         >
-             <div className="flex items-center gap-2 mb-4 border-b border-orange-900 pb-2">
-                <Gauge size={16} />
-                <span className="font-bold">PHYSICS_OVERRIDE [UCT]</span>
-            </div>
+             <h3 className="text-[10px] tracking-[0.3em] uppercase text-zinc-500 mb-6 flex items-center gap-2">
+                <Gauge size={12} />
+                Physics Tuner // S24 Root
+            </h3>
 
-            <div className="mb-4">
-                <div className="flex justify-between text-xs mb-1">
-                    <span>G (GRAVITY)</span>
-                    <span>{g.toFixed(2)} m/s²</span>
+            <div className="space-y-8">
+                <div className="mb-4">
+                    <div className="flex justify-between text-xs mb-1">
+                        <span>G (GRAVITY)</span>
+                        <span>{g.toFixed(2)} m/s²</span>
+                    </div>
+                    <input
+                        type="range" min="0" max="20" step="0.1"
+                        value={g} onChange={(e) => setG(parseFloat(e.target.value))}
+                        disabled={locked}
+                        className="w-full accent-orange-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    />
                 </div>
-                <input
-                    type="range" min="0" max="20" step="0.1"
-                    value={g} onChange={(e) => setG(parseFloat(e.target.value))}
-                    disabled={locked}
-                    className="w-full accent-orange-500"
-                />
-            </div>
 
-            <div className="mb-4">
-                <div className="flex justify-between text-xs mb-1">
-                    <span>c (LIGHT SPEED)</span>
-                    <span>{(c/1e8).toFixed(1)}e8 m/s</span>
+                <div className="mb-4">
+                    <div className="flex justify-between text-xs mb-1">
+                        <span>c (LIGHT SPEED)</span>
+                        <span>{(c/1e8).toFixed(1)}e8 m/s</span>
+                    </div>
+                    <input
+                        type="range" min="1e8" max="10e8" step="1e8"
+                        value={c} onChange={(e) => setC(parseFloat(e.target.value))}
+                        disabled={locked}
+                        className="w-full accent-orange-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    />
                 </div>
-                <input
-                    type="range" min="1e8" max="10e8" step="1e8"
-                    value={c} onChange={(e) => setC(parseFloat(e.target.value))}
-                    disabled={locked}
-                    className="w-full accent-orange-500"
-                />
             </div>
 
             {locked ? (
-                <button
-                    onClick={handleUnlock}
-                    className="w-full border border-orange-500 p-2 flex items-center justify-center gap-2 hover:bg-orange-900/50 transition-colors"
-                >
-                    <ShieldCheck size={14} />
-                    <span>UNLOCK ROOT (S24)</span>
-                </button>
+                <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-50 rounded-lg">
+                    <div className="w-16 h-16 border-2 border-cyan-500 rounded-full animate-pulse flex items-center justify-center mb-4">
+                        <div className="w-8 h-8 bg-cyan-500 rounded-full animate-ping" />
+                    </div>
+                    <p className="text-[10px] font-mono text-cyan-500 tracking-wider">SAMSUNG KNOX VERIFICATION</p>
+                    {authStatus ? (
+                        <p className="mt-4 text-[9px] text-green-500 animate-pulse">{authStatus}</p>
+                    ) : (
+                        <button
+                            onClick={handleUnlock}
+                            className="mt-4 px-4 py-2 border border-zinc-700 text-[9px] hover:bg-zinc-900 text-zinc-300 tracking-widest uppercase transition-all hover:border-cyan-500 hover:text-cyan-500"
+                        >
+                            PLACE FINGER ON SENSOR
+                        </button>
+                    )}
+                </div>
             ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 mt-6">
                     <button
                         onClick={handleApply}
-                        className="w-full bg-orange-600 text-black font-bold p-2 hover:bg-orange-500"
+                        className="w-full bg-orange-600 text-black font-bold p-2 text-xs tracking-widest hover:bg-orange-500 transition-colors"
                     >
-                        APPLY PATCH
+                        APPLY REALITY PATCH
                     </button>
                     <button
                         onClick={handleOuroboros}
-                        className="w-full border border-yellow-500 text-yellow-500 p-2 hover:bg-yellow-900/30 text-xs"
+                        className="w-full border border-yellow-500 text-yellow-500 p-2 text-xs tracking-widest hover:bg-yellow-900/30 transition-colors"
                     >
                         TRIGGER OUROBOROS
                     </button>
                 </div>
             )}
-
-            {authStatus && <div className="mt-2 text-xs text-center animate-pulse">{authStatus}</div>}
         </motion.div>
     );
 };
