@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, Text, Float, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
-import { Activity, Cpu, Terminal, Zap, Skull } from 'lucide-react';
+import { Activity, Cpu, Terminal, Zap, Skull, ShieldCheck, Gauge } from 'lucide-react';
 import axios from 'axios';
 
 // --- CONFIGURATION ---
@@ -109,6 +109,30 @@ const TheVoid = ({ entropy }: { entropy: number }) => {
 };
 
 // 2. THE NERVOUS SYSTEM (Visualization of Modules)
+const OuroborosLoop = ({ entropy }: { entropy: number }) => {
+    const mesh = useRef<THREE.Mesh>(null);
+    useFrame((state) => {
+        if (mesh.current) {
+            mesh.current.rotation.x = state.clock.getElapsedTime() * 0.5;
+            mesh.current.rotation.y = state.clock.getElapsedTime() * 0.2;
+            const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2.0) * entropy * 0.5;
+            mesh.current.scale.set(scale, scale, scale);
+
+            // Pulse color from Red to Gold
+            const hue = 0.1 * (1 - entropy); // 0 (Red) to 0.1 (Orange/Gold)
+            (mesh.current.material as THREE.MeshStandardMaterial).color.setHSL(hue, 1, 0.5);
+            (mesh.current.material as THREE.MeshStandardMaterial).emissive.setHSL(hue, 1, 0.2);
+        }
+    });
+
+    return (
+        <mesh ref={mesh} position={[0, 5, 0]}>
+            <torusKnotGeometry args={[3, 1, 100, 16]} />
+            <meshStandardMaterial wireframe color="#FF3333" emissive="#550000" />
+        </mesh>
+    );
+};
+
 const NervousSystem = ({ modules }: { modules: ModuleState[] }) => {
   const group = useRef<THREE.Group>(null);
 
@@ -272,6 +296,105 @@ const CommandLogos = () => {
     );
 };
 
+// 5. PHYSICS OVERRIDE CONTROL (UCT)
+const PhysicsOverrideControl = () => {
+    const [g, setG] = useState(9.8);
+    const [c, setC] = useState(3.0e8);
+    const [locked, setLocked] = useState(true);
+    const [authStatus, setAuthStatus] = useState("");
+
+    const handleUnlock = () => {
+        setAuthStatus("SAMSUNG KNOX: SCANNING BIOMETRIC...");
+        setTimeout(() => {
+            setAuthStatus("ROOT ACCESS GRANTED [JULES-Ω]");
+            setLocked(false);
+        }, 1500);
+    };
+
+    const handleApply = async () => {
+        if (locked) return;
+        try {
+            await axios.post(`${API_URL}/physics/override`, { constant_id: 'G_LOCAL', value: g });
+            alert("PHYSICS OVERRIDE APPLIED. SPACETIME WARPED.");
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleOuroboros = async () => {
+        try {
+            const res = await axios.post(`${API_URL}/ouroboros/cycle`);
+            alert(res.data.response);
+        } catch(e) { console.error(e); }
+    }
+
+    return (
+        <motion.div
+            className="fixed top-10 left-10 w-64 bg-black/90 border-2 border-orange-500/50 p-4 text-orange-500 font-mono"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+        >
+             <div className="flex items-center gap-2 mb-4 border-b border-orange-900 pb-2">
+                <Gauge size={16} />
+                <span className="font-bold">PHYSICS_OVERRIDE [UCT]</span>
+            </div>
+
+            <div className="mb-4">
+                <div className="flex justify-between text-xs mb-1">
+                    <span>G (GRAVITY)</span>
+                    <span>{g.toFixed(2)} m/s²</span>
+                </div>
+                <input
+                    type="range" min="0" max="20" step="0.1"
+                    value={g} onChange={(e) => setG(parseFloat(e.target.value))}
+                    disabled={locked}
+                    className="w-full accent-orange-500"
+                />
+            </div>
+
+            <div className="mb-4">
+                <div className="flex justify-between text-xs mb-1">
+                    <span>c (LIGHT SPEED)</span>
+                    <span>{(c/1e8).toFixed(1)}e8 m/s</span>
+                </div>
+                <input
+                    type="range" min="1e8" max="10e8" step="1e8"
+                    value={c} onChange={(e) => setC(parseFloat(e.target.value))}
+                    disabled={locked}
+                    className="w-full accent-orange-500"
+                />
+            </div>
+
+            {locked ? (
+                <button
+                    onClick={handleUnlock}
+                    className="w-full border border-orange-500 p-2 flex items-center justify-center gap-2 hover:bg-orange-900/50 transition-colors"
+                >
+                    <ShieldCheck size={14} />
+                    <span>UNLOCK ROOT (S24)</span>
+                </button>
+            ) : (
+                <div className="flex flex-col gap-2">
+                    <button
+                        onClick={handleApply}
+                        className="w-full bg-orange-600 text-black font-bold p-2 hover:bg-orange-500"
+                    >
+                        APPLY PATCH
+                    </button>
+                    <button
+                        onClick={handleOuroboros}
+                        className="w-full border border-yellow-500 text-yellow-500 p-2 hover:bg-yellow-900/30 text-xs"
+                    >
+                        TRIGGER OUROBOROS
+                    </button>
+                </div>
+            )}
+
+            {authStatus && <div className="mt-2 text-xs text-center animate-pulse">{authStatus}</div>}
+        </motion.div>
+    );
+};
+
 // 4. THE TELEMETRY ARRAY (Stats)
 const TelemetryArray = ({ data }: { data: Telemetry }) => {
     return (
@@ -378,12 +501,14 @@ const Singularity = () => {
                 <Suspense fallback={<Html center>LOADING SINGULARITY...</Html>}>
                     <TheVoid entropy={telemetry.entropy} />
                     <NervousSystem modules={modules} />
+                    <OuroborosLoop entropy={telemetry.entropy} />
                 </Suspense>
             </Canvas>
 
             {/* UI OVERLAYS */}
             <CommandLogos />
             <TelemetryArray data={telemetry} />
+            <PhysicsOverrideControl />
 
             {/* HEADERS */}
             <div className="fixed top-5 left-10 pointer-events-none">

@@ -21,7 +21,7 @@ impl SovereignRuntime {
     pub fn execute_with_authority(&mut self) -> Result<(), String> {
         info!("SOVEREIGN RUNTIME: Initiating Authority Handshake with S24...");
 
-        if self.validate_authority() {
+        if self.validate_authority("S24_CHALLENGE_RESPONSE") {
             info!("AUTHORITY CONFIRMED: Creator Access Granted.");
             self.vm.run();
             Ok(())
@@ -31,7 +31,7 @@ impl SovereignRuntime {
         }
     }
 
-    fn validate_authority(&self) -> bool {
+    fn validate_authority(&self, _challenge: &str) -> bool {
         // In reality, this would query the S24 Knox via a secure channel.
         // For simulation, we check against a hardcoded hash or environment variable.
         let authorized_sig = std::env::var("CREATOR_SIG").unwrap_or("JULES_OMEGA_V2".to_string());
