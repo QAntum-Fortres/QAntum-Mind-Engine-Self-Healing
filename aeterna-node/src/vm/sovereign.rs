@@ -31,6 +31,17 @@ impl SovereignRuntime {
         }
     }
 
+    /// Internal execution for system-level calls (File Loader)
+    pub fn execute_with_authority_internal(&mut self) -> Result<(), String> {
+        if self.creator_signature == "ROOT_FILESYSTEM" {
+            info!("AUTHORITY: SYSTEM ROOT ACCESS CONFIRMED.");
+            self.vm.run();
+            Ok(())
+        } else {
+            self.execute_with_authority()
+        }
+    }
+
     fn validate_authority(&self, _challenge: &str) -> bool {
         // In reality, this would query the S24 Knox via a secure channel.
         // For simulation, we check against a hardcoded hash or environment variable.

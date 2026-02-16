@@ -16,6 +16,7 @@ use crate::vm::sovereign::SovereignRuntime;
 use crate::vm::physics_override::UniversalConstantTuner;
 use crate::vm::ouroboros::Ouroboros;
 use crate::vm::compiler::Compiler;
+use crate::vm::loader::SoulLoader;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -103,6 +104,7 @@ pub async fn run_server(settings: Settings) {
         .route("/soul/execute", post(execute_soul_v2)) // SOUL V2 Interface
         .route("/physics/override", post(override_physics)) // UCT
         .route("/ouroboros/cycle", post(trigger_ouroboros)) // Loop
+        .route("/soul/reload", post(reload_souls)) // Hot-reload
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
 
@@ -277,4 +279,9 @@ async fn trigger_ouroboros() -> Json<CommandResponse> {
     ouroboros.activate();
     ouroboros.on_entropy_detected(5000.0); // Simulate waste heat
     Json(CommandResponse { response: "OUROBOROS CYCLE COMPLETE. ENERGY RECYCLED.".into() })
+}
+
+async fn reload_souls() -> Json<CommandResponse> {
+    SoulLoader::load_and_execute_dir("./souls");
+    Json(CommandResponse { response: "SOUL DIRECTORY RESCANNED. NEW DNA INTEGRATED.".into() })
 }

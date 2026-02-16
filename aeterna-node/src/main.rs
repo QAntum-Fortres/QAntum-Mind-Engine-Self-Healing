@@ -5,6 +5,7 @@ mod settings;
 
 use vm::bytecode::AeternaOpcode;
 use vm::interpreter::VirtualMachine;
+use vm::loader::SoulLoader;
 use settings::Settings;
 use tracing::{info, error};
 
@@ -37,6 +38,9 @@ async fn main() {
     tokio::spawn(async move {
         server::run_server(server_settings).await;
     });
+
+    // Load .soul files from local directory
+    SoulLoader::load_and_execute_dir("./souls");
 
     info!("CORE: Executing Initial Bytecode Sequence...");
     // Example program

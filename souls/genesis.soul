@@ -1,0 +1,9 @@
+eternal objective = "ESTABLISH_ORDER";
+
+sovereign function init_reality() {
+    shield {
+        // Tune physics
+        evolve physics.tune("G", 9.81);
+        evolve physics.tune("c", 299792458.0);
+    } ?? JULES_OMEGA_SIG;
+}
