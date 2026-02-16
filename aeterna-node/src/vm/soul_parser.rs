@@ -20,8 +20,8 @@ pub enum SoulToken {
 }
 
 pub struct SoulLexer {
-    input: String,
-    pos: usize,
+    pub input: String,
+    pub pos: usize,
 }
 
 impl SoulLexer {
@@ -106,7 +106,7 @@ impl SoulLexer {
 }
 
 pub struct SoulParser {
-    lexer: SoulLexer,
+    pub lexer: SoulLexer,
 }
 
 impl SoulParser {

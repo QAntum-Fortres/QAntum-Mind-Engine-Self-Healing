@@ -16,6 +16,10 @@ interface Telemetry {
   gpu_usage: number;
   entropy: number;
   temperature: number;
+  bio_link?: {
+      heart_rate: number;
+      focus_level: number;
+  }
 }
 
 interface ModuleState {
@@ -411,6 +415,17 @@ const TelemetryArray = ({ data }: { data: Telemetry }) => {
             <StatRow label="CPU [RYZEN]" value={data.cpu_usage} icon={<Cpu size={14} />} color="text-cyan-400" />
             <StatRow label="GPU [RTX]" value={data.gpu_usage} icon={<Zap size={14} />} color="text-purple-400" />
             <StatRow label="ENTROPY" value={data.entropy} icon={<Skull size={14} />} color="text-red-500" />
+
+            {data.bio_link && (
+                <>
+                    <div className="flex items-center gap-2 mb-2 mt-4 border-b border-green-900 pb-1">
+                        <Activity size={14} />
+                        <span className="font-bold text-xs text-green-500">BIO_LINK [S24]</span>
+                    </div>
+                    <StatRow label="HEART_RATE" value={data.bio_link.heart_rate} icon={<Activity size={14} />} color="text-green-400" />
+                    <StatRow label="FOCUS" value={data.bio_link.focus_level * 100} icon={<ShieldCheck size={14} />} color="text-gold-400" />
+                </>
+            )}
 
             <div className="mt-4 pt-2 border-t border-cyan-900">
                 <div className="flex justify-between text-xs text-gray-500 mb-1">

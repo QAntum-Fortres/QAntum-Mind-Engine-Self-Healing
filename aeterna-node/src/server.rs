@@ -15,6 +15,7 @@ use crate::vm::soul_parser::{SoulParser, SoulToken};
 use crate::vm::sovereign::SovereignRuntime;
 use crate::vm::physics_override::UniversalConstantTuner;
 use crate::vm::ouroboros::Ouroboros;
+use crate::vm::compiler::Compiler;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -22,6 +23,13 @@ struct Telemetry {
     gpu_usage: f64,
     entropy: f64,
     temperature: f64,
+    bio_link: Option<BioData>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct BioData {
+    heart_rate: u8,
+    focus_level: f64, // 0.0 to 1.0
 }
 
 #[derive(Serialize)]
@@ -162,11 +170,18 @@ async fn get_telemetry() -> Json<Telemetry> {
     use std::time::{SystemTime, UNIX_EPOCH};
     let t = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64();
 
+    // Simulate Bio-Link Data from S24
+    let bio_link = Some(BioData {
+        heart_rate: (60.0 + (t * 0.5).sin() * 10.0) as u8,
+        focus_level: (t * 0.05).cos().abs(),
+    });
+
     Json(Telemetry {
         cpu_usage: 45.0 + (t * 0.5).sin() * 10.0,
         gpu_usage: 80.0 + (t * 0.2).cos() * 15.0,
         entropy: (t * 0.1).sin().abs(), // 0 to 1
         temperature: 65.0,
+        bio_link,
     })
 }
 
@@ -237,9 +252,8 @@ async fn invert_entropy() -> Json<CommandResponse> {
 async fn execute_soul_v2(Json(payload): Json<SoulScript>) -> Json<CommandResponse> {
     info!("SERVER: Received SOUL V2 Script with Signature: [{}]", payload.signature);
 
-    // 1. Parse SOUL Code
-    let mut parser = SoulParser::new(&payload.code);
-    let opcodes = parser.parse();
+    // 1. Compile SOUL Code using the new Compiler V2
+    let opcodes = Compiler::compile(&payload.code);
 
     // 2. Initialize Sovereign Runtime
     let mut runtime = SovereignRuntime::new(payload.signature, opcodes);

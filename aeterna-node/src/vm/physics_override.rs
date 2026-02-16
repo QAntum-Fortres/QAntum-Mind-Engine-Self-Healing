@@ -24,6 +24,9 @@ impl UniversalConstantTuner {
         self.local_gravity = g;
         self.causality_speed = c;
 
+        // [REALITY PATCH #01] Persistence
+        self.persist_configuration();
+
         info!("PATCH APPLIED: G = {:.2} m/s^2, c = {:.2} m/s", self.local_gravity, self.causality_speed);
 
         if self.local_gravity <= 0.0 {
@@ -31,6 +34,21 @@ impl UniversalConstantTuner {
         }
         if self.causality_speed > 3.0e8 {
             info!("STATUS: Superluminal Communication Channel Active.");
+        }
+    }
+
+    fn persist_configuration(&self) {
+        use std::fs::File;
+        use std::io::Write;
+
+        let config_data = format!("G={}\nC={}\nENTROPY_FLOW={}",
+            self.local_gravity, self.causality_speed, self.entropy_direction);
+
+        if let Ok(mut file) = File::create("reality.config") {
+            let _ = file.write_all(config_data.as_bytes());
+            info!("REALITY CONFIG SAVED: Local spacetime settings persisted.");
+        } else {
+            warn!("FAILED TO PERSIST REALITY CONFIG: File system read-only?");
         }
     }
 }
