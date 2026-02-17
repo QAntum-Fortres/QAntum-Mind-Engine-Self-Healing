@@ -1,0 +1,11 @@
+[package]
+name = "cognitive_exoskeleton"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.101"
+deno_core = "0.385.0"
+serde = "1.0.228"
+serde_json = "1.0.149"
+tokio = "1.49.0"
