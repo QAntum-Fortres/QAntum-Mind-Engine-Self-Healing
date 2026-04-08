@@ -1,11 +1,13 @@
-import { SovereignHUD } from './components/SovereignHUD';
-import "./App.css";
+import { HeliosUI } from './HeliosUI';
+import SovereignShell from './components/SovereignShell';
+import './App.css';
 
 function App() {
   return (
-    <div className="w-screen h-screen bg-black overflow-hidden selection:bg-cyan-500/30">
-      <SovereignHUD />
-    </div>
+    <SovereignShell>
+      {/* Existing HeliosUI Application mounted inside the new Window Shell */}
+      <HeliosUI />
+    </SovereignShell>
   );
 }
 

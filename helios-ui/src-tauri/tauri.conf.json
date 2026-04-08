@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "helios-ui",
-        "width": 800,
-        "height": 600
+        "title": "QANTUM Sovereign OS",
+        "width": 1200,
+        "height": 800,
+        "decorations": false,
+        "transparent": true,
+        "resizable": true,
+        "center": true
       }
     ],
     "security": {
