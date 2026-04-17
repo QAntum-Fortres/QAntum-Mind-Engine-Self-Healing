@@ -483,6 +483,22 @@ mod tests {
     }
 
     #[test]
+    fn test_complex_probability() {
+        let c_zero = Complex::zero();
+        assert!((c_zero.probability() - 0.0).abs() < f64::EPSILON);
+
+        let c_one = Complex::one();
+        assert!((c_one.probability() - 1.0).abs() < f64::EPSILON);
+
+        let c_mixed = Complex::new(3.0, 4.0);
+        // 3^2 + 4^2 = 9 + 16 = 25
+        assert!((c_mixed.probability() - 25.0).abs() < f64::EPSILON);
+
+        let c_neg = Complex::new(-1.0, -1.0);
+        assert!((c_neg.probability() - 2.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
     fn test_hypervector_similarity() {
         let mut brain = HypervectorBrain::new(1000, Some(42));
         
