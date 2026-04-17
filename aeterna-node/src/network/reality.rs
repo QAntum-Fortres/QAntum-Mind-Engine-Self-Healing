@@ -27,10 +27,16 @@ impl RealityAnchor {
         let is_coherent = event_hash % 2 == 0; // Mock logic: even hashes are valid
 
         if is_coherent {
-            info!("REALITY CHECK: Event [{}] confirmed. Causal chain intact.", event_hash);
+            info!(
+                "REALITY CHECK: Event [{}] confirmed. Causal chain intact.",
+                event_hash
+            );
             true
         } else {
-            warn!("REALITY CHECK: Event [{}] detects CAUSAL PARADOX.", event_hash);
+            warn!(
+                "REALITY CHECK: Event [{}] detects CAUSAL PARADOX.",
+                event_hash
+            );
             false
         }
     }
@@ -42,5 +48,43 @@ impl RealityAnchor {
         // For now, we just reset the entropy.
         self.entropy_threshold = 0.0;
         info!("TIMELINE STABILIZED. Paradox erased from existence.");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let anchor = RealityAnchor::new();
+        assert_eq!(anchor.timeline_hash, "0xCAFEBABE_GENESIS_BLOCK");
+        assert_eq!(anchor.entropy_threshold, 0.0001);
+    }
+
+    #[test]
+    fn test_verify_event() {
+        let anchor = RealityAnchor::new();
+        // Even numbers should be true
+        assert!(anchor.verify_event(2));
+        assert!(anchor.verify_event(0));
+        assert!(anchor.verify_event(42));
+
+        // Odd numbers should be false
+        assert!(!anchor.verify_event(1));
+        assert!(!anchor.verify_event(3));
+        assert!(!anchor.verify_event(1337));
+    }
+
+    #[test]
+    fn test_stabilize_timeline() {
+        let mut anchor = RealityAnchor::new();
+        // Set entropy to an arbitrary value before stabilization
+        anchor.entropy_threshold = 0.5;
+
+        anchor.stabilize_timeline();
+
+        // Stabilize timeline should reset entropy to 0.0
+        assert_eq!(anchor.entropy_threshold, 0.0);
     }
 }

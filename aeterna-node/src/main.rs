@@ -1,11 +1,11 @@
-mod vm;
 mod network;
 mod server;
 mod settings;
+mod vm;
 
-use vm::interpreter::VirtualMachine;
 use settings::Settings;
-use tracing::{info, error};
+use tracing::{error, info};
+use vm::interpreter::VirtualMachine;
 
 #[tokio::main]
 async fn main() {
@@ -28,7 +28,10 @@ async fn main() {
         .init();
 
     info!("AETERNA NODE: Initializing World-Soul Interface...");
-    info!("Configuration loaded. Host: {}, Port: {}", settings.server.host, settings.server.port);
+    info!(
+        "Configuration loaded. Host: {}, Port: {}",
+        settings.server.host, settings.server.port
+    );
 
     // Launch the Noetic Server in the background
     // Cloning settings for the server
@@ -40,15 +43,15 @@ async fn main() {
     info!("CORE: Executing Initial Bytecode Sequence...");
     // Example program
     let program = vec![
-        AeternaOpcode::LOAD(10),
-        AeternaOpcode::LOAD(20),
-        AeternaOpcode::ADD,
-        AeternaOpcode::PRINT,
-        AeternaOpcode::LOAD(42),
-        AeternaOpcode::STORE(0),
-        AeternaOpcode::REQUEST_HOST,
+        crate::vm::bytecode::AeternaOpcode::LOAD(10),
+        crate::vm::bytecode::AeternaOpcode::LOAD(20),
+        crate::vm::bytecode::AeternaOpcode::ADD,
+        crate::vm::bytecode::AeternaOpcode::PRINT,
+        crate::vm::bytecode::AeternaOpcode::LOAD(42),
+        crate::vm::bytecode::AeternaOpcode::STORE(0),
+        crate::vm::bytecode::AeternaOpcode::REQUEST_HOST,
         // VM will halt here, but main process keeps running for server
-        AeternaOpcode::HALT,
+        crate::vm::bytecode::AeternaOpcode::HALT,
     ];
 
     let mut vm = VirtualMachine::new(program);

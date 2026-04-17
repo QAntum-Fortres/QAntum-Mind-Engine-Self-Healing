@@ -1,16 +1,15 @@
+use crate::network::patcher::RealityPatcher;
+use crate::network::reality::RealityAnchor;
+use crate::settings::Settings;
 use axum::{
     routing::{get, post},
-    Router,
-    Json,
+    Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing::{info, warn};
-use crate::settings::Settings;
-use crate::network::reality::RealityAnchor;
-use crate::network::patcher::RealityPatcher;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -147,7 +146,10 @@ async fn get_telemetry() -> Json<Telemetry> {
     // In a real scenario, use `sysinfo` or `nvml-wrapper`
     // Here we simulate "Quantum Entropy"
     use std::time::{SystemTime, UNIX_EPOCH};
-    let t = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64();
+    let t = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs_f64();
 
     Json(Telemetry {
         cpu_usage: 45.0 + (t * 0.5).sin() * 10.0,
@@ -159,10 +161,30 @@ async fn get_telemetry() -> Json<Telemetry> {
 
 async fn get_modules() -> Json<Vec<ModuleState>> {
     Json(vec![
-        ModuleState { id: "1".into(), name: "BIOLOGY".into(), status: "ACTIVE".into(), pulse_rate: 1.0 },
-        ModuleState { id: "2".into(), name: "COGNITION".into(), status: "IDLE".into(), pulse_rate: 0.5 },
-        ModuleState { id: "3".into(), name: "EVOLUTION".into(), status: "ACTIVE".into(), pulse_rate: 1.2 },
-        ModuleState { id: "4".into(), name: "SECURITY".into(), status: "CRITICAL".into(), pulse_rate: 2.0 },
+        ModuleState {
+            id: "1".into(),
+            name: "BIOLOGY".into(),
+            status: "ACTIVE".into(),
+            pulse_rate: 1.0,
+        },
+        ModuleState {
+            id: "2".into(),
+            name: "COGNITION".into(),
+            status: "IDLE".into(),
+            pulse_rate: 0.5,
+        },
+        ModuleState {
+            id: "3".into(),
+            name: "EVOLUTION".into(),
+            status: "ACTIVE".into(),
+            pulse_rate: 1.2,
+        },
+        ModuleState {
+            id: "4".into(),
+            name: "SECURITY".into(),
+            status: "CRITICAL".into(),
+            pulse_rate: 2.0,
+        },
     ])
 }
 
@@ -174,7 +196,9 @@ async fn handle_command(Json(payload): Json<CommandInput>) -> Json<CommandRespon
         _ => "UNKNOWN COMMAND. MODAL LOGIC INVALID.",
     };
 
-    Json(CommandResponse { response: response.to_string() })
+    Json(CommandResponse {
+        response: response.to_string(),
+    })
 }
 
 async fn get_manifesto() -> Json<ManifestoSummary> {
@@ -202,7 +226,10 @@ async fn get_reality_integrity() -> Json<RealityStatus> {
 
 async fn tune_constant(Json(payload): Json<TuneParams>) -> Json<CommandResponse> {
     // Mock tuning logic
-    let msg = format!("ADJUSTING CONSTANT [{}] TO {:.4e}. LOCAL PHYSICS UPDATED.", payload.constant_id, payload.value);
+    let msg = format!(
+        "ADJUSTING CONSTANT [{}] TO {:.4e}. LOCAL PHYSICS UPDATED.",
+        payload.constant_id, payload.value
+    );
     Json(CommandResponse { response: msg })
 }
 
@@ -218,5 +245,7 @@ async fn apply_patch(Json(payload): Json<PatchParams>) -> Json<CommandResponse> 
 }
 
 async fn invert_entropy() -> Json<CommandResponse> {
-    Json(CommandResponse { response: "ENTROPY INVERTED. WASTE HEAT RECYCLED INTO PRIMORDIAL SOUP.".into() })
+    Json(CommandResponse {
+        response: "ENTROPY INVERTED. WASTE HEAT RECYCLED INTO PRIMORDIAL SOUP.".into(),
+    })
 }
