@@ -6,7 +6,7 @@
  * Ensures that Ghost Scan and Eternal Memory are not just scripts, but Organs of the System.
  */
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -31,7 +31,7 @@ export class MagneticField {
         return new Promise((resolve) => {
             const scriptPath = path.resolve(__dirname, '../../../../scripts/ghost-scan.js');
             // We use 'node' to execute the script as a subprocess, effectively "controlling" it
-            exec(`node "${scriptPath}" ${target}`, (error: any, stdout: string) => {
+            execFile('node', [scriptPath, target], (error: any, stdout: string) => {
                 if (error) console.error(`[MagneticField] ⚠️ Ghost Scan Fluctuation: ${error.message}`);
                 resolve(stdout);
             });
@@ -44,7 +44,7 @@ export class MagneticField {
     public async synchronizeMemory(): Promise<string> {
         return new Promise((resolve) => {
             const scriptPath = path.resolve(__dirname, '../../../../scripts/eternal-memory.js');
-            exec(`node "${scriptPath}"`, (error: any, stdout: string) => {
+            execFile('node', [scriptPath], (error: any, stdout: string) => {
                 resolve(stdout);
             });
         });
