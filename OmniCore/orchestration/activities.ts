@@ -1,3 +1,9 @@
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 import { SandboxGuard } from '../security/SandboxGuard';
 import { EvolutionNotary } from '../governance/EvolutionNotary';
 import { Logger } from '../telemetry/Logger';
@@ -65,12 +71,9 @@ export async function applyPatch(code: string, signature: string | null): Promis
         logger.info('ACTIVITY', '✅ Cryptographic signature verified');
     }
 
-    // TODO: Atomic patch application logic
-    // In production: Use git, database transactions, or filesystem atomicity
-    logger.info('ACTIVITY', `📝 Applying patch (${code.length} bytes)...`);
+        logger.info('ACTIVITY', `📝 Applying patch (${code.length} bytes)...`);
 
-    // Placeholder for actual patch application
-    // await applyPatchToCodebase(code);
+    await applyPatchToCodebase(code);
 
     logger.info('ACTIVITY', '✅ Patch applied successfully');
     return `Patch applied successfully at ${new Date().toISOString()}`;
@@ -187,5 +190,28 @@ export async function validateAndHeal(code: string, moduleId: string): Promise<s
             logger.error('ACTIVITY', `❌ Healing failed: ${healingError.message}`);
             throw new Error(`[VALIDATION_AND_HEALING_FAILED]: ${healingError.message}`);
         }
+    }
+}
+
+/**
+ * Applies a code patch to the local codebase using git for atomicity.
+ * Assumes 'code' parameter contains a standard unified diff.
+ */
+async function applyPatchToCodebase(patchContent: string): Promise<void> {
+    const tmpFile = path.join(process.cwd(), `.patch-${Date.now()}-${Math.random().toString(36).substring(7)}.tmp`);
+
+    try {
+        // Write the patch to a temporary file
+        await fs.writeFile(tmpFile, patchContent, 'utf8');
+
+        // Use git apply for atomicity (fails completely or succeeds completely)
+        // --check ensures it can be applied cleanly before applying
+        await execAsync(`git apply --check ${tmpFile}`);
+        await execAsync(`git apply ${tmpFile}`);
+    } catch (error: any) {
+        throw new Error(`Failed to apply patch atomically: ${error.message}`);
+    } finally {
+        // Cleanup temporary file
+        await fs.unlink(tmpFile).catch(() => {});
     }
 }
