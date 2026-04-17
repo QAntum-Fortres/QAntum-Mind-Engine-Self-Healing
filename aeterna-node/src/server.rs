@@ -10,7 +10,7 @@ use tower_http::trace::TraceLayer;
 use tracing::{info, warn};
 use crate::settings::Settings;
 use crate::network::reality::RealityAnchor;
-use crate::network::patcher::RealityPatcher;
+use crate::network::patcher::Patcher;
 
 #[derive(Serialize)]
 struct Telemetry {
@@ -207,7 +207,7 @@ async fn tune_constant(Json(payload): Json<TuneParams>) -> Json<CommandResponse>
 }
 
 async fn apply_patch(Json(payload): Json<PatchParams>) -> Json<CommandResponse> {
-    let patcher = RealityPatcher::new();
+    let patcher = Patcher::new();
     match payload.bug_id.as_str() {
         "c_limit" => patcher.apply_non_local_presence(),
         "aging" => patcher.apply_recursive_renewal("HUMANITY"),

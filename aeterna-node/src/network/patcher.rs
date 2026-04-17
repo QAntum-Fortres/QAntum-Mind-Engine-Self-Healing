@@ -1,10 +1,10 @@
 use tracing::{info, warn};
 
-pub struct RealityPatcher;
+pub struct Patcher;
 
-impl RealityPatcher {
+impl Patcher {
     pub fn new() -> Self {
-        RealityPatcher
+        Patcher
     }
 
     /// [HOTFIX #1] Removes spatial latency (c limit)
@@ -25,5 +25,16 @@ impl RealityPatcher {
         for i in 0..instances {
             info!("  > Instance #{}.{} spawned in Timeline Alpha.", soul_id, i);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_patcher_new() {
+        let patcher = Patcher::new();
+        let _p: Patcher = patcher;
     }
 }
