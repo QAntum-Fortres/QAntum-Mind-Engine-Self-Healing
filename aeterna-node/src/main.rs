@@ -1,3 +1,4 @@
+use crate::vm::bytecode::AeternaOpcode;
 mod vm;
 mod network;
 mod server;

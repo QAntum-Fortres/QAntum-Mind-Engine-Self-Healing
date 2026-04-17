@@ -1,8 +1,8 @@
 // aeterna-node/src/vm/interpreter.rs
 
 use super::bytecode::AeternaOpcode;
-use crate::network::teleport::{VMState, teleport_vm_to_host};
-use tracing::{info, warn, error};
+use crate::network::teleport::{teleport_vm_to_host, VMState};
+use tracing::{error, info, warn};
 
 pub struct VirtualMachine {
     pub stack: Vec<i64>,
@@ -111,19 +111,19 @@ impl VirtualMachine {
 
                 // --- AETERNA 2200 HANDLERS ---
                 AeternaOpcode::ONTOLOGICAL_SHIFT(coords) => {
-                     println!("VM: Initiating HLR Transport to coords: {}", coords);
+                    println!("VM: Initiating HLR Transport to coords: {}", coords);
                 }
                 AeternaOpcode::RESONATE_MEMBRANE(freq) => {
-                     println!("VM: Resonating Noetic Membrane at {} Hz", freq);
+                    println!("VM: Resonating Noetic Membrane at {} Hz", freq);
                 }
                 AeternaOpcode::INVERT_ENTROPY(joules) => {
-                     println!("VM: Harvesting {} J from Quantum Vacuum...", joules);
+                    println!("VM: Harvesting {} J from Quantum Vacuum...", joules);
                 }
                 AeternaOpcode::VERIFY_TIMELINE(hash) => {
-                     println!("VM: Verifying causal consistency of event 0x{:X}...", hash);
+                    println!("VM: Verifying causal consistency of event 0x{:X}...", hash);
                 }
                 AeternaOpcode::PREDICT_NEED(user) => {
-                     println!("VM: Calculating future needs for Entity #{}", user);
+                    println!("VM: Calculating future needs for Entity #{}", user);
                 }
 
                 // --- ONTOLOGICAL HANDLERS ---
@@ -169,7 +169,9 @@ impl VirtualMachine {
         let mut sum_sq = 0.0;
         let n = self.memory.len() as f64;
 
-        if n == 0.0 { return 0.0; }
+        if n == 0.0 {
+            return 0.0;
+        }
 
         for val in &self.memory {
             let v = *val as f64;
@@ -199,8 +201,8 @@ impl VirtualMachine {
         // but for now, we just order the chaos.
 
         let final_entropy = self.calculate_entropy(); // Should be closer to 0 for a sorted distribution?
-        // Actually, sorted data has the same variance, but structurally it is "ordered".
-        // To truly reach "0.00", we must collapse the wave function.
+                                                      // Actually, sorted data has the same variance, but structurally it is "ordered".
+                                                      // To truly reach "0.00", we must collapse the wave function.
 
         // "Absolute Zero" Interpretation:
         // Collapse all memory into a single Point of Unity (The sum of all parts).
@@ -247,5 +249,38 @@ mod tests {
         let mut vm = VirtualMachine::new(program);
         vm.run(); // Should print error and push 0
         assert_eq!(vm.stack.pop(), Some(0));
+    }
+
+    #[test]
+    fn test_calculate_entropy_empty() {
+        let mut vm = VirtualMachine::new(vec![]);
+        vm.memory.clear();
+        assert_eq!(vm.calculate_entropy(), 0.0);
+    }
+
+    #[test]
+    fn test_calculate_entropy_zero_memory() {
+        let mut vm = VirtualMachine::new(vec![]);
+        vm.memory = vec![0; 100];
+        assert_eq!(vm.calculate_entropy(), 0.0);
+    }
+
+    #[test]
+    fn test_calculate_entropy_uniform_memory() {
+        let mut vm = VirtualMachine::new(vec![]);
+        vm.memory = vec![42; 100];
+        assert_eq!(vm.calculate_entropy(), 0.0);
+    }
+
+    #[test]
+    fn test_calculate_entropy_varied_memory() {
+        let mut vm = VirtualMachine::new(vec![]);
+        vm.memory = vec![0, 100, 200, 300];
+        let entropy = vm.calculate_entropy();
+        assert!(
+            entropy > 0.0,
+            "Entropy should be greater than 0 for varied memory, got {}",
+            entropy
+        );
     }
 }
