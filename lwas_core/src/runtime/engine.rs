@@ -38,9 +38,9 @@ impl NeuralOracle for MockOracle {
     }
 }
 
+use crate::kernel::magnet::MagnetScavenger;
 use crate::memory::vsh::{QuantumPoint, VectorSpaceHeap};
 use crate::neuro::hud::NeuralHUD;
-use crate::kernel::magnet::MagnetScavenger;
 use std::sync::Arc;
 
 pub struct AmnioticEngine {
@@ -72,9 +72,11 @@ impl AmnioticEngine {
     // Slow Path: Neuro-Symbolic Execution
     pub async fn execute_spirit(&self, goal: &str) -> String {
         println!("[SPIRIT] Contemplating goal: {}", goal);
-        
+
         // Emit HUD wave for awareness
-        self.hud.emit_wave("SPIRIT_THOUGHT", goal, "AmnioticEngine").await;
+        self.hud
+            .emit_wave("SPIRIT_THOUGHT", goal, "AmnioticEngine")
+            .await;
 
         // 1. Generate embedding for the goal
         let goal_vector = self.oracle.embed(goal);

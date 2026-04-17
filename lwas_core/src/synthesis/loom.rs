@@ -1,8 +1,8 @@
 // src/lwas_core/synthesis/loom.rs
 use crate::kernel::engine::VshKernel;
+use rand::Rng;
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
-use rand::Rng;
 
 /// Aeterna-Loom: The Recursive Reality Weaver
 /// This module simulates future market states, identifies anomalies, and autonomously seeds assets.
@@ -30,7 +30,10 @@ impl AeternaLoom {
 
         // 1. Vibe-to-Vector Mapping
         let vibe_vector = self.map_vibe_to_vector(operator_vibe);
-        println!("[LOOM] Operator Vibe '{}' mapped to Gravitational Vector: {:.4}", operator_vibe, vibe_vector);
+        println!(
+            "[LOOM] Operator Vibe '{}' mapped to Gravitational Vector: {:.4}",
+            operator_vibe, vibe_vector
+        );
 
         // 2. The Temporal Mirror (1000 Parallel Simulations)
         println!("[LOOM] Spinning The Temporal Mirror (1,000 parallel simulations)...");
@@ -38,8 +41,12 @@ impl AeternaLoom {
 
         // 3. Logic-to-Value Transduction & Autonomous Seeding
         for anomaly in anomalies {
-            println!("[LOOM] ⚠ ANOMALY DETECTED in sector '{}'. Gap: {:.2}, Value: ${:.2}B",
-                     anomaly.sector, anomaly.logic_gap, anomaly.potential_value / 1_000_000_000.0);
+            println!(
+                "[LOOM] ⚠ ANOMALY DETECTED in sector '{}'. Gap: {:.2}, Value: ${:.2}B",
+                anomaly.sector,
+                anomaly.logic_gap,
+                anomaly.potential_value / 1_000_000_000.0
+            );
 
             self.seed_asset(&anomaly);
         }
@@ -85,7 +92,10 @@ impl AeternaLoom {
     }
 
     fn seed_asset(&self, anomaly: &EconomicAnomaly) {
-        println!("[LOOM] ⚡ COMMANDING SovereignGenerator: Build Asset for '{}' IMMEDIATELY.", anomaly.sector);
+        println!(
+            "[LOOM] ⚡ COMMANDING SovereignGenerator: Build Asset for '{}' IMMEDIATELY.",
+            anomaly.sector
+        );
         // In a real system, this would call the SovereignGenerator module to generate code.
         // Here we register a placeholder manifold.
         let manifold_id = format!("ASSET_{}", anomaly.sector);

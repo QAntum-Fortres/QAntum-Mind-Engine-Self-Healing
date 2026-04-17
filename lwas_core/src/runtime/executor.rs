@@ -14,7 +14,7 @@ pub enum OpCode {
 
 pub struct VshExecutor {
     pub instruction_pointer: usize,
-    pub memory_field: Vec<u8>, 
+    pub memory_field: Vec<u8>,
 }
 
 impl VshExecutor {
@@ -33,12 +33,14 @@ impl VshExecutor {
         let opcode = self.memory_field[self.instruction_pointer];
 
         match opcode {
-            0x01 => { // GENESIS
+            0x01 => {
+                // GENESIS
                 kernel.register("NEW_MANIFOLD", 0.0);
-            },
-            0x05 => { // TRANSCEND
+            }
+            0x05 => {
+                // TRANSCEND
                 self.handle_transcendence();
-            },
+            }
             _ => { /* LOG OPS */ }
         }
 

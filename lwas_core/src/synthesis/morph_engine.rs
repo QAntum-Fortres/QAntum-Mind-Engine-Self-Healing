@@ -24,7 +24,10 @@ impl MorphEngine {
         let optimized_logic = "collapse Market_Target { shortcut: true }";
 
         self.evolution_rate += 0.001;
-        println!("📈 [MORPH] System Evolution Rate increased to: {:.4}", self.evolution_rate);
+        println!(
+            "📈 [MORPH] System Evolution Rate increased to: {:.4}",
+            self.evolution_rate
+        );
 
         optimized_logic.to_string()
     }

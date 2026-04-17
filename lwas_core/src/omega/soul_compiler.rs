@@ -16,28 +16,38 @@ impl SoulCompiler {
                 AstNode::Manifold { name, body } => {
                     println!(
                         "[SOUL_COMPILER] Defining Manifold: {} ({} sub-nodes)",
-                        name, body.len()
+                        name,
+                        body.len()
                     );
                     // In the 2200 spec, manifolds are mapped to memory states
                     bytecode.push(AeternaOpcode::LOAD(body.len() as i64 * 1000));
                     bytecode.push(AeternaOpcode::STORE(0)); // Store base curvature in slot 0
-                    // Recursively compile inner nodes
+                                                            // Recursively compile inner nodes
                     let inner_bytecode = Self::compile(body);
                     bytecode.extend(inner_bytecode);
                 }
                 AstNode::Resonate { target, frequency } => {
-                    println!("[SOUL_COMPILER] Resonating {} at frequency {}", target, frequency);
-                    bytecode.push(AeternaOpcode::RESONATE_MEMBRANE(frequency as usize)); // Global Noetic frequency
+                    println!(
+                        "[SOUL_COMPILER] Resonating {} at frequency {}",
+                        target, frequency
+                    );
+                    bytecode.push(AeternaOpcode::RESONATE_MEMBRANE(frequency as usize));
+                    // Global Noetic frequency
                 }
-                AstNode::Collapse { target, entropy_threshold } => {
-                    println!("[SOUL_COMPILER] Collapsing Manifold: {} (threshold: {})", target, entropy_threshold);
-                    bytecode.push(AeternaOpcode::INVERT_ENTROPY((entropy_threshold * 100.0) as usize)); // Harvest energy from collapse
+                AstNode::Collapse {
+                    target,
+                    entropy_threshold,
+                } => {
+                    println!(
+                        "[SOUL_COMPILER] Collapsing Manifold: {} (threshold: {})",
+                        target, entropy_threshold
+                    );
+                    bytecode.push(AeternaOpcode::INVERT_ENTROPY(
+                        (entropy_threshold * 100.0) as usize,
+                    )); // Harvest energy from collapse
                 }
                 AstNode::Entrench { key, value } => {
-                    println!(
-                        "[SOUL_COMPILER] Entrenching {} with value {:?}",
-                        key, value
-                    );
+                    println!("[SOUL_COMPILER] Entrenching {} with value {:?}", key, value);
                     bytecode.push(AeternaOpcode::VERIFY_TIMELINE(0x4121)); // Verify causal state
                 }
                 AstNode::Immortal { name, value } => {
@@ -57,7 +67,10 @@ impl SoulCompiler {
                     bytecode.push(AeternaOpcode::ONTOLOGICAL_SHIFT(power as usize));
                 }
                 AstNode::Department { name, priority } => {
-                    println!("[SOUL_COMPILER] Department: {} (priority: {})", name, priority);
+                    println!(
+                        "[SOUL_COMPILER] Department: {} (priority: {})",
+                        name, priority
+                    );
                     bytecode.push(AeternaOpcode::FORK_INSTANCE(priority as usize));
                 }
                 AstNode::Reflect => {
@@ -68,9 +81,19 @@ impl SoulCompiler {
                     println!("[SOUL_COMPILER] Axiom: {} = {}", name, expression);
                     bytecode.push(AeternaOpcode::INVERT_LOGIC(name.len()));
                 }
-                AstNode::Causality { cause, effect, c_type } => {
-                    println!("[SOUL_COMPILER] Causality: {} -> {} ({})", cause, effect, c_type);
-                    bytecode.push(AeternaOpcode::PATCH_REALITY(0, format!("{}_to_{}", cause, effect)));
+                AstNode::Causality {
+                    cause,
+                    effect,
+                    c_type,
+                } => {
+                    println!(
+                        "[SOUL_COMPILER] Causality: {} -> {} ({})",
+                        cause, effect, c_type
+                    );
+                    bytecode.push(AeternaOpcode::PATCH_REALITY(
+                        0,
+                        format!("{}_to_{}", cause, effect),
+                    ));
                 }
             }
         }

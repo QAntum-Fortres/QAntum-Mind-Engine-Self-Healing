@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use axum::{routing::post, Json, Router, extract::State};
+use axum::{extract::State, routing::post, Json, Router};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
@@ -26,12 +26,14 @@ impl SovereignBrainAPI {
         let addr = SocketAddr::from(([127, 0, 0, 1], 9999));
         println!("🧠 SOVEREIGN BRAIN API ONLINE AT http://{}", addr);
 
-        let listener = TcpListener::bind(addr).await
+        let listener = TcpListener::bind(addr)
+            .await
             .map_err(|e| SovereignError::IoError(e.to_string()))?;
-        
-        axum::serve(listener, app).await
+
+        axum::serve(listener, app)
+            .await
             .map_err(|e| SovereignError::LogicCollapse(e.to_string()))?;
-        
+
         Ok(())
     }
 }
@@ -53,7 +55,7 @@ pub struct SovereignInferenceEngine;
 impl SovereignInferenceEngine {
     pub fn infer(vsh: &VectorSpaceHeap, prompt: &str) -> String {
         let p_lower = prompt.to_lowercase();
-        
+
         if p_lower.contains("entropy") {
             let entropy = 0.5; // vsh.get_global_entropy(); // Align with vsh.rs implementation
             format!("📡 [VERITAS_PROBE]: Global Entropy is {:.8}. The 2-billion point manifold is mathematically stable.", entropy)

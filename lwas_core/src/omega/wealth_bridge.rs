@@ -2,8 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA
 // STATUS: STUB_MODE // NOTE: Solana integration disabled for polymorphic build
 
-use serde::Deserialize;
 use crate::prelude::SovereignResult;
+use serde::Deserialize;
 
 /// Wealth Bridge - Economic data and asset management
 pub struct WealthBridge;

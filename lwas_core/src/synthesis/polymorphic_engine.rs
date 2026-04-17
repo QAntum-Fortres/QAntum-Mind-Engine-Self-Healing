@@ -4,7 +4,7 @@
 // PHASE: 1 - Самомодификация и невидимост
 
 //! # Полиморфен Двигател (Polymorphic Engine)
-//! 
+//!
 //! Модул за саморедактиращ се код - първата стъпка към "Морфогенетичното Инженерство".
 //! Превръща статичния Rust код в движеща се мишена (Moving Target Defense - MTD).
 //!
@@ -14,9 +14,9 @@
 //! - **Anti-Analysis**: Техники за защита срещу дебъгери и анализатори
 
 use crate::prelude::*;
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
-use sha2::{Sha256, Digest};
+use rand::{Rng, SeedableRng};
+use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -177,23 +177,23 @@ impl PolymorphicEngine {
 
     /// Регистрира код блок за полиморфна обработка
     pub fn register_block(&self, block: CodeBlock) {
-        println!("🧬 [POLYMORPH] Registering code block: {} (entropy: {:.4})", 
-                 block.id, block.entropy);
+        println!(
+            "🧬 [POLYMORPH] Registering code block: {} (entropy: {:.4})",
+            block.id, block.entropy
+        );
         self.code_blocks.insert(block.id.clone(), block);
     }
 
     /// Изпълнява една итерация на полиморфна мутация
     pub fn mutate(&mut self) -> SovereignResult<TransformationResult> {
         let mutation_id = MUTATION_COUNTER.fetch_add(1, Ordering::SeqCst);
-        
+
         // Избираме случайна трансформация
         let transform_type = self.select_transformation();
-        
+
         // Събираме ключовете на блоковете
-        let keys: Vec<String> = self.code_blocks.iter()
-            .map(|e| e.key().clone())
-            .collect();
-        
+        let keys: Vec<String> = self.code_blocks.iter().map(|e| e.key().clone()).collect();
+
         // Прилагаме трансформацията върху всички блокове
         let mut total_entropy = 0.0;
         let block_count = keys.len();
@@ -231,20 +231,28 @@ impl PolymorphicEngine {
 
         self.transformation_log.push(result.clone());
 
-        println!("🔀 [POLYMORPH] Mutation #{} complete. Type: {:?}, Entropy: {:.4}", 
-                 mutation_id, transform_type, avg_entropy);
+        println!(
+            "🔀 [POLYMORPH] Mutation #{} complete. Type: {:?}, Entropy: {:.4}",
+            mutation_id, transform_type, avg_entropy
+        );
 
         Ok(result)
     }
 
     /// Избира трансформация базирано на конфигурацията
     fn select_transformation(&mut self) -> TransformationType {
-        let idx = self.rng.gen_range(0..self.config.allowed_transformations.len());
+        let idx = self
+            .rng
+            .gen_range(0..self.config.allowed_transformations.len());
         self.config.allowed_transformations[idx]
     }
 
     /// Прилага трансформация върху код блок (статичен метод)
-    fn apply_transformation_static(rng: &mut StdRng, block: &mut CodeBlock, transform_type: TransformationType) {
+    fn apply_transformation_static(
+        rng: &mut StdRng,
+        block: &mut CodeBlock,
+        transform_type: TransformationType,
+    ) {
         match transform_type {
             TransformationType::ControlFlowFlatten => {
                 Self::flatten_control_flow_static(rng, block);
@@ -275,9 +283,11 @@ impl PolymorphicEngine {
         for byte in &mut block.content {
             *byte ^= key;
         }
-        
+
         // Добавяме маркер за flatten
-        block.metadata.insert("flattened".to_string(), "true".to_string());
+        block
+            .metadata
+            .insert("flattened".to_string(), "true".to_string());
     }
 
     /// Dead Code Injection - добавяне на безполезни байтове
@@ -298,8 +308,9 @@ impl PolymorphicEngine {
             }
         }
 
-        block.metadata.insert("dead_code_count".to_string(), 
-                             injection_count.to_string());
+        block
+            .metadata
+            .insert("dead_code_count".to_string(), injection_count.to_string());
     }
 
     /// Instruction Substitution - замяна с еквивалентни операции
@@ -309,7 +320,7 @@ impl PolymorphicEngine {
         for byte in &mut block.content {
             *byte = *byte ^ key ^ key; // Идентитет, но с различен път
         }
-        
+
         // Добавяме шум в края
         block.content.push(rng.gen());
     }
@@ -327,7 +338,8 @@ impl PolymorphicEngine {
     /// Loop Unrolling - разгръщаме чрез дублиране
     fn unroll_loops_static(block: &mut CodeBlock) {
         let original = block.content.clone();
-        if original.len() < 100 { // Ограничение за размера
+        if original.len() < 100 {
+            // Ограничение за размера
             block.content.extend(original);
         }
     }
@@ -338,16 +350,17 @@ impl PolymorphicEngine {
         for (i, byte) in block.content.iter_mut().enumerate() {
             *byte ^= key[i % 4];
         }
-        
+
         // Запазваме ключа в метаданните за декриптиране
-        block.metadata.insert("encryption_key".to_string(), 
-                             hex::encode(key));
+        block
+            .metadata
+            .insert("encryption_key".to_string(), hex::encode(key));
     }
 
     /// Изчислява SHA-256 хеш на цялото състояние
     fn compute_state_hash(&self) -> [u8; 32] {
         let mut hasher = Sha256::new();
-        
+
         // Добавяме всички блокове в хеша
         for entry in self.code_blocks.iter() {
             hasher.update(&entry.value().content);
@@ -395,8 +408,11 @@ impl PolymorphicEngine {
 
     /// Стартира непрекъснат полиморфен цикъл (async)
     pub async fn start_continuous_mutation(&mut self, iterations: usize) -> SovereignResult<()> {
-        println!("🔄 [POLYMORPH] Starting continuous mutation ({} iterations)", iterations);
-        
+        println!(
+            "🔄 [POLYMORPH] Starting continuous mutation ({} iterations)",
+            iterations
+        );
+
         for i in 0..iterations {
             if self.detect_analysis() {
                 println!("🛑 [POLYMORPH] Analysis detected, entering stealth mode");
@@ -404,14 +420,19 @@ impl PolymorphicEngine {
             }
 
             self.mutate()?;
-            
+
             // Изчакваме според конфигурацията
-            tokio::time::sleep(
-                std::time::Duration::from_millis(self.config.mutation_interval_ms)
-            ).await;
+            tokio::time::sleep(std::time::Duration::from_millis(
+                self.config.mutation_interval_ms,
+            ))
+            .await;
 
             if (i + 1) % 10 == 0 {
-                println!("📊 [POLYMORPH] Progress: {}/{} mutations complete", i + 1, iterations);
+                println!(
+                    "📊 [POLYMORPH] Progress: {}/{} mutations complete",
+                    i + 1,
+                    iterations
+                );
             }
         }
 
@@ -454,16 +475,16 @@ mod tests {
             seed: Some(12345), // Детерминистичен seed за тестове
             ..Default::default()
         };
-        
+
         let mut engine = PolymorphicEngine::new(config);
-        
+
         // Регистрираме тестов блок
         let block = CodeBlock::new("test", vec![1, 2, 3, 4, 5, 6, 7, 8]);
         engine.register_block(block);
 
         // Изпълняваме мутация
         let result = engine.mutate().unwrap();
-        
+
         assert_eq!(result.mutation_id, 0);
         assert!(result.entropy_score >= 0.0 && result.entropy_score <= 1.0);
     }
@@ -474,7 +495,7 @@ mod tests {
             seed: Some(42),
             ..Default::default()
         };
-        
+
         let mut engine = PolymorphicEngine::new(config);
         engine.register_block(CodeBlock::new("test", vec![0; 64]));
 

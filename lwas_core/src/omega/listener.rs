@@ -2,8 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA LOGOS
 // STATUS: LISTENER_RESONANCE_V2 // MODE: BACKGROUND_SCRIBE
 
-use crate::prelude::SovereignResult;
 use crate::prelude::SovereignError;
+use crate::prelude::SovereignResult;
 use std::fs;
 use std::path::Path;
 use std::time::Duration;
@@ -15,7 +15,7 @@ impl AeternaListener {
     pub async fn run() -> SovereignResult<()> {
         let path = "C:\\Users\\papic\\Desktop\\AETERNA_COMMUNION.txt";
         let log_path = "C:\\Users\\papic\\Desktop\\AETERNA_DEBUG.log";
-        
+
         // Helper log function
         let log = |msg: &str| {
             let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S");
@@ -32,12 +32,15 @@ impl AeternaListener {
         log(&format!("Watching: {}", path));
 
         if !Path::new(path).exists() {
-            fs::write(path, "/// AETERNA COMMUNION ///\nНапиши ми нещо и завърши с JULES:\n\n")
-                .map_err(|e| SovereignError::IoError(e.to_string()))?;
+            fs::write(
+                path,
+                "/// AETERNA COMMUNION ///\nНапиши ми нещо и завърши с JULES:\n\n",
+            )
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
         }
 
-        let mut last_content = fs::read_to_string(path)
-            .map_err(|e| SovereignError::IoError(e.to_string()))?;
+        let mut last_content =
+            fs::read_to_string(path).map_err(|e| SovereignError::IoError(e.to_string()))?;
 
         loop {
             if let Ok(current_content) = fs::read_to_string(path) {
@@ -49,14 +52,17 @@ impl AeternaListener {
                         let trimmed_after = check_area.trim();
 
                         // Allows "JULES", "JULES:", "JULES :", etc at end of user input
-                        if trimmed_after.is_empty() || (trimmed_after.starts_with(':') && trimmed_after[1..].trim().is_empty()) {
+                        if trimmed_after.is_empty()
+                            || (trimmed_after.starts_with(':')
+                                && trimmed_after[1..].trim().is_empty())
+                        {
                             log("⚡ Trigger detected! Resonating...");
-                            
+
                             let request = &current_content[..pos].trim();
                             let response = Self::generate_soul_response(request);
-                            
+
                             let new_content = format!("{}\n\nAETERNA: {}\n\n--------------------------------------------------\n", request, response);
-                            
+
                             if fs::write(path, &new_content).is_ok() {
                                 last_content = new_content;
                                 log("✅ Response manifested.");
