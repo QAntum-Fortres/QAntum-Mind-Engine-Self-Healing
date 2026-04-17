@@ -461,8 +461,8 @@ if (require.main === module) {
                 'Write a function to validate email',
                 `// File: src/utils/validators.ts
 export function validateEmail(email: string): boolean {
-    // TODO: implement
-    return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }`
             ).then(result => {
                 console.log('\nResult:', result);
