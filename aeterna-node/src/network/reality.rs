@@ -44,3 +44,31 @@ impl RealityAnchor {
         info!("TIMELINE STABILIZED. Paradox erased from existence.");
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stabilize_timeline() {
+        let mut anchor = RealityAnchor::new();
+        // Modify to a paradox state
+        anchor.entropy_threshold = 0.5;
+
+        anchor.stabilize_timeline();
+
+        // Ensure entropy threshold has been reset to safe state
+        assert_eq!(anchor.entropy_threshold, 0.0);
+    }
+
+    #[test]
+    fn test_verify_event() {
+        let anchor = RealityAnchor::new();
+
+        // Test valid event (even hash)
+        assert_eq!(anchor.verify_event(42), true);
+
+        // Test invalid event (odd hash)
+        assert_eq!(anchor.verify_event(43), false);
+    }
+}
