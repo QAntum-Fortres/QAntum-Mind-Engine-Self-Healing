@@ -24,9 +24,9 @@ pub enum TeleportError {
 
 use chacha20poly1305::{
     aead::{Aead, AeadCore, KeyInit, OsRng},
-    ChaCha20Poly1305, Nonce
+    ChaCha20Poly1305, Nonce,
 };
-use tracing::{info, debug};
+use tracing::{debug, info};
 
 pub fn teleport_vm_to_host(vm_state: VMState, target_host_id: &str) -> Result<(), TeleportError> {
     info!("Initiating teleportation sequence...");
@@ -43,7 +43,8 @@ pub fn teleport_vm_to_host(vm_state: VMState, target_host_id: &str) -> Result<()
     let cipher = ChaCha20Poly1305::new(&key);
     let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng); // 96-bits; unique per message
 
-    let encrypted_state = cipher.encrypt(&nonce, state_json.as_bytes())
+    let encrypted_state = cipher
+        .encrypt(&nonce, state_json.as_bytes())
         .map_err(|e| TeleportError::EncryptionFailed(e.to_string()))?;
 
     info!("Encrypting state (checksum: {:?})...", vm_state.checksum);
@@ -52,7 +53,10 @@ pub fn teleport_vm_to_host(vm_state: VMState, target_host_id: &str) -> Result<()
     // 3. Network Transmission (Simulated)
     // In a real implementation, this would use libp2p to send the data.
     // For now, we simulate success.
-    info!("Sending {} bytes of encrypted state to P2P network...", encrypted_state.len());
+    info!(
+        "Sending {} bytes of encrypted state to P2P network...",
+        encrypted_state.len()
+    );
 
     info!("Teleportation signal sent successfully.");
     Ok(())
