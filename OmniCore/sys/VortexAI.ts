@@ -120,19 +120,11 @@ export class VortexAI extends EventEmitter {
         let totalModules = 0;
         const modulesToRemember: { id: string, content: string, metadata: any }[] = [];
 
-        await Promise.all(manifests.map(async (file) => {
+        for (const file of manifests) {
             try {
                 const filePath = path.join(process.cwd(), file);
 
-                let fileExists = false;
                 try {
-                    await fs.promises.access(filePath);
-                    fileExists = true;
-                } catch (accessErr) {
-                    // File doesn't exist or cannot be read
-                }
-
-                if (fileExists) {
                     const fileContent = await fs.promises.readFile(filePath, 'utf8');
                     const data = JSON.parse(fileContent);
                     console.log(`[VORTEX] 📘 Absorbed ${data.name}: ${data.totalModules} modules.`);
@@ -146,11 +138,16 @@ export class VortexAI extends EventEmitter {
                             metadata: { squad: data.name, type: mod.type }
                         });
                     }
+                } catch (err: any) {
+                    // Only throw warning if it's not a simple ENOENT
+                    if (err.code !== 'ENOENT') {
+                        throw err;
+                    }
                 }
             } catch (e) {
                 console.warn(`[VORTEX] ⚠️ Warning: Could not absorb ${file}`);
             }
-        }));
+        }
 
         console.log(`[VORTEX] 🧠 Total Neural Pathways: ${totalModules}`);
         console.log(`[VORTEX] 🧬 Integration with Hybrid Healer: ACTIVE`);
