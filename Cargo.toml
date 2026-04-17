@@ -2,6 +2,6 @@
 members = [
     "lwas_parser",
     "lwas_cli",
-    "helios-ui/src-tauri",
+    "helios-ui/src-tauri", "cognitive_exoskeleton",
 ]
 resolver = "2"
