@@ -461,6 +461,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_complex_zero() {
+        let zero = Complex::zero();
+        assert_eq!(zero.real, 0.0);
+        assert_eq!(zero.imag, 0.0);
+    }
+
+    #[test]
     fn test_quantum_superposition() {
         let state = QuantumState::uniform_superposition(2);
         
