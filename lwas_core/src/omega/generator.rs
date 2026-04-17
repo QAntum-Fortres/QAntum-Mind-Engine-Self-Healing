@@ -90,15 +90,11 @@ impl SovereignGenerator {
             }}
             
             async fn handler(Json(_payload): Json<serde_json::Value>) -> Json<serde_json::Value> {{
-                todo!()
+                {}
             }}
             
-            // LOGIC CORE:
-            /*
-            {}
-            */
             ",
-            logic.replace("*/", "* /") 
+            logic
         )
     }
 
