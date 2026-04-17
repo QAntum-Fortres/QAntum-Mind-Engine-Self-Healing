@@ -129,8 +129,7 @@ export class VortexHealingNexus extends EventEmitter {
     private healingSuccesses: Map<HealingDomain, number> = new Map();
     private healingFailures: Map<HealingDomain, number> = new Map();
 
-    // LivenessToken secret for signing
-    private readonly TOKEN_SECRET: string;
+    // LivenessToken secret is managed by LivenessTokenManager
 
     public constructor() {
         super();
@@ -143,8 +142,7 @@ export class VortexHealingNexus extends EventEmitter {
         this.mlPredictor = new HealingStrategyPredictor();
 
         // Use shared secret manager for consistent signing/verification
-        const tokenManager = LivenessTokenManager.getInstance();
-        this.TOKEN_SECRET = tokenManager.getSecret();
+        // LivenessTokenManager is accessed dynamically
 
         this.logger.info('HEALING-NEXUS', '🩺 Immune System Orchestrator initialized with static injection');
 
@@ -408,8 +406,9 @@ export class VortexHealingNexus extends EventEmitter {
         const payload = `${moduleId}:${timestamp}:${status}`;
 
         // HMAC signature for integrity
+        const tokenManager = LivenessTokenManager.getInstance();
         const signature = crypto
-            .createHmac('sha256', this.TOKEN_SECRET)
+            .createHmac('sha256', tokenManager.getSecret())
             .update(payload)
             .digest('hex');
 
@@ -432,14 +431,26 @@ export class VortexHealingNexus extends EventEmitter {
             const decoded = Buffer.from(token, 'base64').toString('utf-8');
             const [moduleId, timestampStr, status, signature] = decoded.split(':');
 
-            // Verify signature
+            // Verify signature using valid secrets (supports grace period)
             const payload = `${moduleId}:${timestampStr}:${status}`;
-            const expectedSignature = crypto
-                .createHmac('sha256', this.TOKEN_SECRET)
-                .update(payload)
-                .digest('hex');
+            const tokenManager = LivenessTokenManager.getInstance();
+            const validSecrets = tokenManager.getValidSecrets();
 
-            if (signature !== expectedSignature) {
+            let isValid = false;
+
+            for (const secret of validSecrets) {
+                const expectedSignature = crypto
+                    .createHmac('sha256', secret)
+                    .update(payload)
+                    .digest('hex');
+
+                if (signature === expectedSignature) {
+                    isValid = true;
+                    break;
+                }
+            }
+
+            if (!isValid) {
                 this.logger.warn('HEALING-NEXUS', '⚠️ Invalid LivenessToken signature');
                 return null;
             }

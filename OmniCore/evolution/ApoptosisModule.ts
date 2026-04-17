@@ -249,16 +249,26 @@ export class ApoptosisModule extends EventEmitter {
                 throw new Error('LivenessToken from future - possible clock skew attack');
             }
 
-            // Step 4: Cryptographically verify HMAC-SHA256 signature
+            // Step 4: Cryptographically verify HMAC-SHA256 signature (supports grace period)
             const tokenManager = LivenessTokenManager.getInstance();
-            const TOKEN_SECRET = tokenManager.getSecret();
+            const validSecrets = tokenManager.getValidSecrets();
             const payload = `${tokenModuleId}:${timestampStr}:${status}`;
-            const expectedSignature = crypto
-                .createHmac('sha256', TOKEN_SECRET)
-                .update(payload)
-                .digest('hex');
 
-            if (providedSignature !== expectedSignature) {
+            let isSignatureValid = false;
+
+            for (const secret of validSecrets) {
+                const expectedSignature = crypto
+                    .createHmac('sha256', secret)
+                    .update(payload)
+                    .digest('hex');
+
+                if (providedSignature === expectedSignature) {
+                    isSignatureValid = true;
+                    break;
+                }
+            }
+
+            if (!isSignatureValid) {
                 throw new Error('LivenessToken signature verification FAILED - token is forged or corrupted');
             }
 
