@@ -6,10 +6,6 @@
 name: Enterprise CI/CD Pipeline
 
 on:
-  push:
-    branches: [main, develop, 'release/*']
-  pull_request:
-    branches: [main, develop]
   workflow_dispatch:
     inputs:
       deploy_environment:
@@ -218,7 +214,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push:
+    branches-ignore: ["*"] ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
