@@ -13,6 +13,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { NeuralInference } from '../intelligence/NeuralInference';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -339,14 +340,13 @@ NOW EXECUTE:
      * 🔧 EXECUTE INFERENCE - Placeholder за действителния inference
      */
     private static async executeInference(prompt: string): Promise<string> {
-        // TODO: Connect to actual NeuralInference
-        // For now, return the prompt for testing
         console.log('⛓️ Prompt prepared. Length:', prompt.length, 'chars');
 
-        // This would be replaced with:
-        // return await NeuralInference.infer(prompt);
-
-        return `[COLLAR TEST] Prompt size: ${prompt.length} chars. Ready for inference.`;
+        // Note: The comment suggested `NeuralInference.infer(prompt)` but it's an instance method,
+        // so we use neuralEngine exported from NeuralInference.
+        const neuralEngine = NeuralInference.getInstance();
+        const result = await neuralEngine.infer(prompt);
+        return result || '';
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
