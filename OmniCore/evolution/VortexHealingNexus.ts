@@ -128,6 +128,7 @@ export class VortexHealingNexus extends EventEmitter {
     private healingAttempts: Map<HealingDomain, number> = new Map();
     private healingSuccesses: Map<HealingDomain, number> = new Map();
     private healingFailures: Map<HealingDomain, number> = new Map();
+    private healingDurations: Map<HealingDomain, number> = new Map();
 
     // LivenessToken secret for signing
     private readonly TOKEN_SECRET: string;
@@ -222,6 +223,7 @@ export class VortexHealingNexus extends EventEmitter {
 
             // Track success
             this.healingSuccesses.set(domain, (this.healingSuccesses.get(domain) || 0) + 1);
+            this.healingDurations.set(domain, (this.healingDurations.get(domain) || 0) + duration);
 
             const result: HealingResult = {
                 success: true,
@@ -246,6 +248,7 @@ export class VortexHealingNexus extends EventEmitter {
 
             // Track failure
             this.healingFailures.set(domain, (this.healingFailures.get(domain) || 0) + 1);
+            this.healingDurations.set(domain, (this.healingDurations.get(domain) || 0) + duration);
 
             const result: HealingResult = {
                 success: false,
@@ -466,6 +469,7 @@ export class VortexHealingNexus extends EventEmitter {
             const attempts = this.healingAttempts.get(domain) || 0;
             const successes = this.healingSuccesses.get(domain) || 0;
             const failures = this.healingFailures.get(domain) || 0;
+            const duration = this.healingDurations.get(domain) || 0;
             const successRate = attempts > 0 ? (successes / attempts) * 100 : 0;
 
             stats[domain] = {
@@ -486,6 +490,7 @@ export class VortexHealingNexus extends EventEmitter {
         this.healingAttempts.clear();
         this.healingSuccesses.clear();
         this.healingFailures.clear();
+        this.healingDurations.clear();
         this.logger.info('HEALING-NEXUS', '📊 Healing statistics reset');
     }
 
@@ -509,9 +514,11 @@ export class VortexHealingNexus extends EventEmitter {
             const attempts = this.healingAttempts.get(domain) || 0;
             const successes = this.healingSuccesses.get(domain) || 0;
             const failures = this.healingFailures.get(domain) || 0;
+            const duration = this.healingDurations.get(domain) || 0;
 
             totalAttempts += attempts;
             totalSuccesses += successes;
+            totalDuration += duration;
 
             byDomain[domain] = {
                 attempts,
@@ -523,7 +530,7 @@ export class VortexHealingNexus extends EventEmitter {
         return {
             totalAttempts,
             successRate: totalAttempts > 0 ? totalSuccesses / totalAttempts : 0,
-            averageDuration: 0, // TODO: Track duration per healing attempt
+            averageDuration: totalAttempts > 0 ? totalDuration / totalAttempts : 0,
             byDomain
         };
     }
