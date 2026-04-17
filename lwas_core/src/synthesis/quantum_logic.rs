@@ -513,4 +513,11 @@ mod tests {
         let sim1 = HypervectorBrain::similarity(&bundled, &v1);
         assert!(sim1 > 0.0);
     }
+
+    #[test]
+    fn test_complex_new() {
+        let c = Complex::new(3.0, -4.5);
+        assert_eq!(c.real, 3.0);
+        assert_eq!(c.imag, -4.5);
+    }
 }
