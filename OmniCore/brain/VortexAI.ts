@@ -9,11 +9,11 @@ import { PineconeVectorStore } from '../../agents/PineconeVectorStore'; // 🧠 
 
 /**
  * 🌪️ VORTEX AI (High-Frequency Execution Engine)
- * 
+ *
  * Uses:
  * 1. WATCHDOG: For memory safety (Self-Destructs on leak).
  * 2. HYBRID HEALER: For runtime repair.
- * 
+ *
  * "Speed without control is suicide."
  */
 
@@ -118,30 +118,29 @@ export class VortexAI extends EventEmitter {
         let totalModules = 0;
         const modulesToRemember: { id: string, content: string, metadata: any }[] = [];
 
-        for (const file of manifests) {
+        const fs = require('fs/promises');
+        const path = require('path');
+
+        await Promise.all(manifests.map(async (file) => {
             try {
-                const fs = require('fs');
-                const path = require('path');
                 const filePath = path.join(process.cwd(), file);
+                const content = await fs.readFile(filePath, 'utf8');
+                const data = JSON.parse(content);
+                console.log(`[VORTEX] 📘 Absorbed ${data.name}: ${data.totalModules} modules.`);
+                totalModules += data.totalModules;
 
-                if (fs.existsSync(filePath)) {
-                    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                    console.log(`[VORTEX] 📘 Absorbed ${data.name}: ${data.totalModules} modules.`);
-                    totalModules += data.totalModules;
-
-                    // Prepare modules for Pinecone upsert
-                    for (const mod of data.modules) {
-                        modulesToRemember.push({
-                            id: `vortex-${mod.id}-${Date.now()}`,
-                            content: `Module: ${mod.id}. Path: ${mod.path}. Type: ${mod.type}. Exports: ${mod.exports?.join(', ') || 'N/A'}`,
-                            metadata: { squad: data.name, type: mod.type }
-                        });
-                    }
+                // Prepare modules for Pinecone upsert
+                for (const mod of data.modules) {
+                    modulesToRemember.push({
+                        id: `vortex-${mod.id}-${Date.now()}`,
+                        content: `Module: ${mod.id}. Path: ${mod.path}. Type: ${mod.type}. Exports: ${mod.exports?.join(', ') || 'N/A'}`,
+                        metadata: { squad: data.name, type: mod.type }
+                    });
                 }
             } catch (e) {
                 console.warn(`[VORTEX] ⚠️ Warning: Could not absorb ${file}`);
             }
-        }
+        }));
 
         console.log(`[VORTEX] 🧠 Total Neural Pathways: ${totalModules}`);
         console.log(`[VORTEX] 🧬 Integration with Hybrid Healer: ACTIVE`);
