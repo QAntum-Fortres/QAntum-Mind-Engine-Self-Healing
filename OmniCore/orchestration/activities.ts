@@ -84,8 +84,7 @@ export async function applyPatch(code: string, signature: string | null): Promis
 export async function notifyAdmin(code: string): Promise<void> {
     logger.info('ACTIVITY', '📧 Notifying administrator...');
 
-    // TODO: Implement notification logic
-    // Options: Email, SMS, Telegram, Slack, PagerDuty
+    const webhookUrl = process.env.ADMIN_WEBHOOK_URL;
 
     const notificationMessage = `
 🚨 HIGH-RISK EVOLUTION REQUIRES APPROVAL
@@ -99,9 +98,20 @@ Send approval via: npm run vortex:approve <workflowId> <signature>
 
     logger.warn('ACTIVITY', notificationMessage);
 
-    // Placeholder: In production, integrate with notification service
-    // await sendEmail(process.env.ADMIN_EMAIL, 'Vortex Evolution Approval Required', notificationMessage);
-    // await sendTelegram(process.env.ADMIN_TELEGRAM_ID, notificationMessage);
+    if (webhookUrl) {
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: notificationMessage })
+            });
+            if (!response.ok) {
+                logger.warn('ACTIVITY', `Failed to send notification via webhook: ${response.statusText}`);
+            }
+        } catch (error: any) {
+            logger.warn('ACTIVITY', `Error sending webhook notification: ${error.message}`);
+        }
+    }
 
     logger.info('ACTIVITY', '✅ Administrator notified');
 }

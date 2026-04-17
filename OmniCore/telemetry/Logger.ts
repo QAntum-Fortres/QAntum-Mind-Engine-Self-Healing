@@ -25,4 +25,8 @@ export class Logger {
     public error(context: string, message: string, error?: any): void {
         console.error(`[ERROR][${context}] ${message}`, error);
     }
+
+    public critical(context: string, message: string, error?: any): void {
+        console.error(`[CRITICAL][${context}] ${message}`, error);
+    }
 }
