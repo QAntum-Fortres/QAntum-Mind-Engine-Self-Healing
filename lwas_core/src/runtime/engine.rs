@@ -52,11 +52,11 @@ pub struct AmnioticEngine {
 
 impl AmnioticEngine {
     pub fn new(_memory_path: &str) -> Self {
-        let memory = VectorSpaceHeap::new().expect("Failed to initialize VSH");
+        let memory = Arc::new(VectorSpaceHeap::new().expect("Failed to initialize VSH"));
         Self {
-            memory: Arc::new(memory),
+            memory: memory.clone(),
             oracle: Box::new(MockOracle),
-            hud: Arc::new(NeuralHUD::new(Arc::new(VectorSpaceHeap::new().unwrap()))), // Fix: Needs VSH
+            hud: Arc::new(NeuralHUD::new(memory)), // Fix: Needs VSH
             magnet: MagnetScavenger::new(),
         }
     }
