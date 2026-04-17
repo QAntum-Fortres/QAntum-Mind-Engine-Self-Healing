@@ -124,8 +124,9 @@ export class VortexAI extends EventEmitter {
             try {
                 const filePath = path.join(process.cwd(), file);
 
-                if (fs.existsSync(filePath)) {
-                    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                try {
+                    const fileContent = await fs.promises.readFile(filePath, 'utf8');
+                    const data = JSON.parse(fileContent);
                     console.log(`[VORTEX] 📘 Absorbed ${data.name}: ${data.totalModules} modules.`);
                     totalModules += data.totalModules;
 
@@ -136,6 +137,11 @@ export class VortexAI extends EventEmitter {
                             content: `Module: ${mod.id}. Path: ${mod.path}. Type: ${mod.type}. Exports: ${mod.exports?.join(', ') || 'N/A'}`,
                             metadata: { squad: data.name, type: mod.type }
                         });
+                    }
+                } catch (err: any) {
+                    // Only throw warning if it's not a simple ENOENT
+                    if (err.code !== 'ENOENT') {
+                        throw err;
                     }
                 }
             } catch (e) {
