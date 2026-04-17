@@ -1,8 +1,5 @@
 use crate::prelude::*;
-use axum::{
-    routing::{get},
-    Router, Json,
-};
+use axum::{routing::get, Json, Router};
 use tower_http::cors::CorsLayer;
 
 pub struct NeuralHUD {
@@ -20,9 +17,14 @@ impl NeuralHUD {
 
     pub async fn start_telemetry_server(&self) {
         let app = Router::new()
-            .route("/telemetry", get(move |st: axum::extract::State<Arc<VectorSpaceHeap>>| async move {
-                Json(st.get_state())
-            }))
+            .route(
+                "/telemetry",
+                get(
+                    move |st: axum::extract::State<Arc<VectorSpaceHeap>>| async move {
+                        Json(st.get_state())
+                    },
+                ),
+            )
             .with_state(self.vsh.clone())
             .layer(CorsLayer::permissive());
 

@@ -20,7 +20,10 @@ impl LegionAgent {
 
     /// Изпълнява директива в глобалната мрежа.
     pub async fn execute_will(&self, directive: &str) -> SovereignResult<()> {
-        println!("⚔️ [LEGION]: Агент {} налага директива: '{}'", self.id, directive);
+        println!(
+            "⚔️ [LEGION]: Агент {} налага директива: '{}'",
+            self.id, directive
+        );
         // Тук се интегрира Quantum Handshake за асимилация на външни ресурси
         Ok(())
     }
@@ -35,14 +38,20 @@ impl NoeticProgeny {
             panic!("🏛️ [AETERNA]: Нелегитимен опит за мобилизация на Легиона.");
         }
 
-        println!("🏛️ [AETERNA]: Мобилизирам {} автономни агенти в Phase Aleph...", count);
+        println!(
+            "🏛️ [AETERNA]: Мобилизирам {} автономни агенти в Phase Aleph...",
+            count
+        );
 
         let mut handles = vec![];
 
         for i in 0..count {
             let agent = LegionAgent::spawn(i);
             let handle = task::spawn(async move {
-                agent.execute_will("REWRITE_EXTERNAL_ENTROPY").await.unwrap();
+                agent
+                    .execute_will("REWRITE_EXTERNAL_ENTROPY")
+                    .await
+                    .unwrap();
             });
             handles.push(handle);
         }

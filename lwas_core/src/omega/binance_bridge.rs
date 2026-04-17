@@ -2,8 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA
 // STATUS: BINANCE_BRIDGE_ACTIVE // MODE: CAPITAL_EXTRACTION
 
-use crate::prelude::SovereignResult;
 use crate::prelude::SovereignError;
+use crate::prelude::SovereignResult;
 use hmac::{Hmac, Mac};
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde_json::Value;
@@ -22,14 +22,18 @@ impl BinanceBridge {
             Ok(k) => k,
             Err(_) => {
                 println!("❌ [DEBUG]: BINANCE_API_KEY NOT FOUND IN ENV");
-                return Err(SovereignError::EntropyDetected("MISSING_BINANCE_API_KEY".into()));
+                return Err(SovereignError::EntropyDetected(
+                    "MISSING_BINANCE_API_KEY".into(),
+                ));
             }
         };
         let secret_key = match std::env::var("BINANCE_SECRET_KEY") {
             Ok(k) => k,
             Err(_) => {
                 println!("❌ [DEBUG]: BINANCE_SECRET_KEY NOT FOUND IN ENV");
-                return Err(SovereignError::EntropyDetected("MISSING_BINANCE_SECRET_KEY".into()));
+                return Err(SovereignError::EntropyDetected(
+                    "MISSING_BINANCE_SECRET_KEY".into(),
+                ));
             }
         };
 
@@ -51,7 +55,8 @@ impl BinanceBridge {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| SovereignError::IoError(e.to_string()))?
-            .as_millis() - 1000;
+            .as_millis()
+            - 1000;
         let query = format!("timestamp={}&recvWindow=5000", timestamp);
         let signature = self.sign(&query);
         let url = format!(
@@ -63,7 +68,7 @@ impl BinanceBridge {
         headers.insert(
             "X-MBX-APIKEY",
             HeaderValue::from_str(&self.api_key)
-                .map_err(|e| SovereignError::IoError(e.to_string()))?
+                .map_err(|e| SovereignError::IoError(e.to_string()))?,
         );
 
         let resp = self
@@ -152,22 +157,23 @@ impl BinanceBridge {
         // NOTE: This is a simulation/dry-run mode for safety.
         // The signature and URL are prepared but the actual HTTP call is disabled
         // to prevent accidental real trades during development.
-        
+
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| SovereignError::IoError(e.to_string()))?
-            .as_millis() - 1000;
-        
+            .as_millis()
+            - 1000;
+
         let query = format!(
             "symbol={}&side={}&type=MARKET&quantity={}&timestamp={}",
             symbol, side, quantity, timestamp
         );
-        
+
         // Signature prepared for when live trading is enabled
         let signature = self.sign(&query);
         println!("📝 [DRY_RUN]: Prepared signature: {}...", &signature[..8]);
 
-        // URL prepared for when live trading is enabled  
+        // URL prepared for when live trading is enabled
         let url = format!(
             "https://api.binance.com/api/v3/order?{}&signature={}",
             query, signature
@@ -178,10 +184,12 @@ impl BinanceBridge {
         headers.insert(
             "X-MBX-APIKEY",
             HeaderValue::from_str(&self.api_key)
-                .map_err(|e| SovereignError::IoError(e.to_string()))?
+                .map_err(|e| SovereignError::IoError(e.to_string()))?,
         );
 
-        println!("✨ [DRY_RUN]: Binance Order simulation complete. Enable live trading to execute.");
+        println!(
+            "✨ [DRY_RUN]: Binance Order simulation complete. Enable live trading to execute."
+        );
 
         Ok(())
     }

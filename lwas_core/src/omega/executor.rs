@@ -2,8 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA
 // STATUS: STUB_MODE // NOTE: Solana integration disabled for polymorphic build
 
-use serde::{Deserialize, Serialize};
 use crate::prelude::SovereignResult;
+use serde::{Deserialize, Serialize};
 
 /// Execution Engine - Placeholder for Solana transaction execution
 pub struct ExecutionEngine;

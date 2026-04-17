@@ -4,7 +4,7 @@
 // PHASE: 3 - Квантова и не-бинарна логика
 
 //! # Quantum-Inspired Logic (Квантово-вдъхновена логика)
-//! 
+//!
 //! Симулация на квантови принципи върху класически хардуер.
 //! Позволява работа с вероятностни състояния и суперпозиция.
 //!
@@ -14,8 +14,8 @@
 //! - **Hyperdimensional Vectors**: Кодиране в многомерни пространства
 
 use crate::prelude::*;
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 use std::f64::consts::PI;
 
 /// Квантово състояние - суперпозиция от възможности
@@ -45,11 +45,17 @@ impl Complex {
     }
 
     pub fn zero() -> Self {
-        Self { real: 0.0, imag: 0.0 }
+        Self {
+            real: 0.0,
+            imag: 0.0,
+        }
     }
 
     pub fn one() -> Self {
-        Self { real: 1.0, imag: 0.0 }
+        Self {
+            real: 1.0,
+            imag: 0.0,
+        }
     }
 
     pub fn from_polar(magnitude: f64, phase: f64) -> Self {
@@ -69,7 +75,10 @@ impl Complex {
     }
 
     pub fn conjugate(&self) -> Self {
-        Self { real: self.real, imag: -self.imag }
+        Self {
+            real: self.real,
+            imag: -self.imag,
+        }
     }
 
     pub fn add(&self, other: &Self) -> Self {
@@ -100,7 +109,7 @@ impl QuantumState {
         let dim = 1 << num_qubits; // 2^n
         let mut amplitudes = vec![Complex::zero(); dim];
         amplitudes[0] = Complex::one(); // |00...0⟩
-        
+
         Self {
             amplitudes,
             num_qubits,
@@ -114,7 +123,7 @@ impl QuantumState {
         let dim = 1 << num_qubits;
         let amplitude = 1.0 / (dim as f64).sqrt();
         let amplitudes = vec![Complex::new(amplitude, 0.0); dim];
-        
+
         Self {
             amplitudes,
             num_qubits,
@@ -125,10 +134,8 @@ impl QuantumState {
 
     /// Нормализира състоянието (сумата от вероятностите = 1)
     pub fn normalize(&mut self) {
-        let total_prob: f64 = self.amplitudes.iter()
-            .map(|a| a.probability())
-            .sum();
-        
+        let total_prob: f64 = self.amplitudes.iter().map(|a| a.probability()).sum();
+
         if total_prob > 0.0 {
             let factor = 1.0 / total_prob.sqrt();
             for amp in &mut self.amplitudes {
@@ -162,7 +169,7 @@ impl QuantumState {
                 // Колапсираме към това състояние
                 self.collapsed = true;
                 self.classical_value = Some(index);
-                
+
                 // Занулявам всички други амплитуди
                 for (i, amp) in self.amplitudes.iter_mut().enumerate() {
                     if i == index {
@@ -171,7 +178,7 @@ impl QuantumState {
                         *amp = Complex::zero();
                     }
                 }
-                
+
                 return index;
             }
         }
@@ -197,7 +204,7 @@ impl QuantumState {
             for j in i..(i + step) {
                 let a = self.amplitudes[j];
                 let b = self.amplitudes[j + step];
-                
+
                 self.amplitudes[j] = a.add(&b).scale(sqrt2_inv);
                 self.amplitudes[j + step] = a.add(&b.scale(-1.0)).scale(sqrt2_inv);
             }
@@ -271,7 +278,10 @@ impl ProbabilisticComputer {
     /// Инициализира в равномерна суперпозиция
     pub fn initialize_superposition(&mut self) {
         self.state = QuantumState::uniform_superposition(self.state.num_qubits);
-        println!("🌌 [QUANTUM] Initialized {} qubits in superposition", self.state.num_qubits);
+        println!(
+            "🌌 [QUANTUM] Initialized {} qubits in superposition",
+            self.state.num_qubits
+        );
     }
 
     /// Прилага квантов алгоритъм (поредица от gates)
@@ -288,12 +298,19 @@ impl ProbabilisticComputer {
                 }
                 QuantumGate::Phase(qubit, angle) => {
                     self.state.phase_shift(qubit, angle);
-                    println!("🔄 [QUANTUM] Applied Phase({:.2}°) on qubit {}", angle.to_degrees(), qubit);
+                    println!(
+                        "🔄 [QUANTUM] Applied Phase({:.2}°) on qubit {}",
+                        angle.to_degrees(),
+                        qubit
+                    );
                 }
                 QuantumGate::Measure(qubit) => {
                     let result = self.state.measure(&mut self.rng);
                     self.measurement_history.push(result);
-                    println!("📏 [QUANTUM] Measured qubit {}: collapsed to {}", qubit, result);
+                    println!(
+                        "📏 [QUANTUM] Measured qubit {}: collapsed to {}",
+                        qubit, result
+                    );
                 }
             }
         }
@@ -303,15 +320,19 @@ impl ProbabilisticComputer {
     pub fn measure(&mut self) -> usize {
         let result = self.state.measure(&mut self.rng);
         self.measurement_history.push(result);
-        println!("📊 [QUANTUM] Measurement result: {} (binary: {:0width$b})", 
-                 result, result, width = self.state.num_qubits);
+        println!(
+            "📊 [QUANTUM] Measurement result: {} (binary: {:0width$b})",
+            result,
+            result,
+            width = self.state.num_qubits
+        );
         result
     }
 
     /// Изпълнява множество измервания и връща разпределението
     pub fn sample(&mut self, shots: usize) -> std::collections::HashMap<usize, usize> {
         let mut results = std::collections::HashMap::new();
-        
+
         for _ in 0..shots {
             // Ресетваме до суперпозиция преди всяко измерване
             self.state = QuantumState::uniform_superposition(self.state.num_qubits);
@@ -322,7 +343,12 @@ impl ProbabilisticComputer {
         println!("📈 [QUANTUM] Sampling complete ({} shots)", shots);
         for (state, count) in &results {
             let probability = *count as f64 / shots as f64;
-            println!("   |{}⟩: {:.2}% ({} times)", state, probability * 100.0, count);
+            println!(
+                "   |{}⟩: {:.2}% ({} times)",
+                state,
+                probability * 100.0,
+                count
+            );
         }
 
         results
@@ -330,7 +356,9 @@ impl ProbabilisticComputer {
 
     /// Връща вероятностите за всички състояния
     pub fn get_probabilities(&self) -> Vec<f64> {
-        self.state.amplitudes.iter()
+        self.state
+            .amplitudes
+            .iter()
             .map(|a| a.probability())
             .collect()
     }
@@ -391,15 +419,16 @@ impl HypervectorBrain {
 
         let vector = self.random_vector();
         self.memory.insert(symbol.to_string(), vector.clone());
-        println!("🧠 [HDC] Encoded '{}' as {}-dimensional hypervector", symbol, self.dimension);
+        println!(
+            "🧠 [HDC] Encoded '{}' as {}-dimensional hypervector",
+            symbol, self.dimension
+        );
         vector
     }
 
     /// Свързва два хипервектора (XOR операция)
     pub fn bind(a: &[i8], b: &[i8]) -> Vec<i8> {
-        a.iter().zip(b.iter())
-            .map(|(x, y)| x * y)
-            .collect()
+        a.iter().zip(b.iter()).map(|(x, y)| x * y).collect()
     }
 
     /// Пакетира множество хипервектора (мажоритарно гласуване)
@@ -418,17 +447,20 @@ impl HypervectorBrain {
         }
 
         // Мажоритарно гласуване
-        result.iter()
+        result
+            .iter()
             .map(|&sum| if sum >= 0 { 1 } else { -1 })
             .collect()
     }
 
     /// Измерва сходство (косинус) между два хипервектора
     pub fn similarity(a: &[i8], b: &[i8]) -> f64 {
-        let dot: i64 = a.iter().zip(b.iter())
+        let dot: i64 = a
+            .iter()
+            .zip(b.iter())
             .map(|(x, y)| (*x as i64) * (*y as i64))
             .sum();
-        
+
         let norm_a: f64 = (a.iter().map(|x| (*x as i64).pow(2)).sum::<i64>() as f64).sqrt();
         let norm_b: f64 = (b.iter().map(|x| (*x as i64).pow(2)).sum::<i64>() as f64).sqrt();
 
@@ -461,9 +493,16 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_complex_zero() {
+        let c = Complex::zero();
+        assert_eq!(c.real, 0.0);
+        assert_eq!(c.imag, 0.0);
+    }
+
+    #[test]
     fn test_quantum_superposition() {
         let state = QuantumState::uniform_superposition(2);
-        
+
         // Всички 4 състояния трябва да имат равна вероятност
         for i in 0..4 {
             let prob = state.probability_of(i);
@@ -475,7 +514,7 @@ mod tests {
     fn test_quantum_measurement() {
         let mut state = QuantumState::zero_state(1);
         let mut rng = StdRng::seed_from_u64(42);
-        
+
         // |0⟩ състояние винаги колапсира до 0
         let result = state.measure(&mut rng);
         assert_eq!(result, 0);
@@ -485,7 +524,7 @@ mod tests {
     #[test]
     fn test_hypervector_similarity() {
         let mut brain = HypervectorBrain::new(1000, Some(42));
-        
+
         let cat = brain.encode("cat");
         let cat2 = brain.encode("cat"); // Същият символ
         let dog = brain.encode("dog");
@@ -502,13 +541,13 @@ mod tests {
     #[test]
     fn test_hypervector_bundle() {
         let mut brain = HypervectorBrain::new(100, Some(42));
-        
+
         let v1 = brain.random_vector();
         let v2 = brain.random_vector();
         let v3 = brain.random_vector();
 
         let bundled = HypervectorBrain::bundle(&[v1.clone(), v2.clone(), v3.clone()]);
-        
+
         // Bundled вектор трябва да е по-сходен на компонентите си
         let sim1 = HypervectorBrain::similarity(&bundled, &v1);
         assert!(sim1 > 0.0);

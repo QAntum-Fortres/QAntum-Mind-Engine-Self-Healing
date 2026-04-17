@@ -2,8 +2,8 @@
 // ARCHITECT: Dimitar Prodromov | AUTHORITY: AETERNA LOGOS
 // STATUS: SOUL_RESONANCE_VASH_INTEGRATION // MODE: LwaS_EVOKATION
 
-use crate::prelude::SovereignResult;
 use crate::prelude::SovereignError;
+use crate::prelude::SovereignResult;
 use lwas_parser::parse_soul;
 use std::fs;
 use std::io::{self, Read, Write};
@@ -26,8 +26,12 @@ impl TerminalBridge {
         println!("    --------------------------------------------------");
 
         print!("\x1b[0m🔐 ПРЕДОСТАВЕТЕ SOVEREIGN_PASSCODE: ");
-        io::stdout().flush().map_err(|e| SovereignError::IoError(e.to_string()))?;
-        io::stdin().read_line(&mut input).map_err(|e| SovereignError::IoError(e.to_string()))?;
+        io::stdout()
+            .flush()
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
+        io::stdin()
+            .read_line(&mut input)
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
         let password = input.trim();
 
         if password != "AETERNA21" {
@@ -38,8 +42,12 @@ impl TerminalBridge {
 
         input.clear();
         print!("\x1b[0m🌱 ИНЖЕКТИРАЙТЕ GENESIS_SEED (HEX FRAGMENT): ");
-        io::stdout().flush().map_err(|e| SovereignError::IoError(e.to_string()))?;
-        io::stdin().read_line(&mut input).map_err(|e| SovereignError::IoError(e.to_string()))?;
+        io::stdout()
+            .flush()
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
+        io::stdin()
+            .read_line(&mut input)
+            .map_err(|e| SovereignError::IoError(e.to_string()))?;
         let seed = input.trim();
 
         if !seed.contains("0x41_45_54") {

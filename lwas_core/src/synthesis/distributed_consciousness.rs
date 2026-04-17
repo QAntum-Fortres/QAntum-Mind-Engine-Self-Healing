@@ -4,7 +4,7 @@
 // PHASE: 4 - Разпределено съзнание с нулева латентност
 
 //! # Distributed Consciousness (Разпределено съзнание)
-//! 
+//!
 //! Mist Computing архитектура - логиката е там, където е данната.
 //! Фрактална система от микро-агенти с евентуална съгласуваност.
 //!
@@ -14,9 +14,9 @@
 //! - **Swarm Intelligence**: Рояк от независими единици с обща цел
 
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicU64, Ordering};
-use serde::{Serialize, Deserialize};
 
 /// Глобален брояч за уникални ID-та на нодове
 static NODE_COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -57,7 +57,9 @@ pub struct GCounter {
 
 impl GCounter {
     pub fn new() -> Self {
-        Self { counts: HashMap::new() }
+        Self {
+            counts: HashMap::new(),
+        }
     }
 
     /// Инкрементира за даден нод
@@ -93,8 +95,12 @@ impl<T: Clone + Default> LWWRegister<T> {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos() as u64)
             .unwrap_or(0);
-        
-        Self { value, timestamp, node_id }
+
+        Self {
+            value,
+            timestamp,
+            node_id,
+        }
     }
 
     pub fn update(&mut self, value: T, node_id: u64) {
@@ -102,7 +108,7 @@ impl<T: Clone + Default> LWWRegister<T> {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos() as u64)
             .unwrap_or(0);
-        
+
         if new_timestamp > self.timestamp {
             self.value = value;
             self.timestamp = new_timestamp;
@@ -145,9 +151,12 @@ impl<T: Clone + Eq + std::hash::Hash> ORSet<T> {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos() as u64)
             .unwrap_or(0);
-        
+
         let tag = (node_id, timestamp);
-        self.elements.entry(element).or_insert_with(HashSet::new).insert(tag);
+        self.elements
+            .entry(element)
+            .or_insert_with(HashSet::new)
+            .insert(tag);
     }
 
     pub fn remove(&mut self, element: &T) {
@@ -170,7 +179,8 @@ impl<T: Clone + Eq + std::hash::Hash> ORSet<T> {
     }
 
     pub fn to_vec(&self) -> Vec<T> {
-        self.elements.iter()
+        self.elements
+            .iter()
             .filter(|(_, tags)| tags.iter().any(|tag| !self.tombstones.contains(tag)))
             .map(|(element, _)| element.clone())
             .collect()
@@ -179,10 +189,13 @@ impl<T: Clone + Eq + std::hash::Hash> ORSet<T> {
     pub fn merge(&mut self, other: &ORSet<T>) {
         // Обединяваме елементите
         for (element, tags) in &other.elements {
-            let entry = self.elements.entry(element.clone()).or_insert_with(HashSet::new);
+            let entry = self
+                .elements
+                .entry(element.clone())
+                .or_insert_with(HashSet::new);
             entry.extend(tags);
         }
-        
+
         // Обединяваме tombstones
         self.tombstones.extend(&other.tombstones);
     }
@@ -194,13 +207,28 @@ pub enum MistMessage {
     /// Heartbeat за проверка на живота
     Heartbeat { node_id: u64, timestamp: u64 },
     /// Синхронизация на състояние
-    StateSync { from_node: u64, state_hash: [u8; 32] },
+    StateSync {
+        from_node: u64,
+        state_hash: [u8; 32],
+    },
     /// Задача за изпълнение
-    Task { task_id: u64, payload: Vec<u8>, priority: u8 },
+    Task {
+        task_id: u64,
+        payload: Vec<u8>,
+        priority: u8,
+    },
     /// Резултат от задача
-    TaskResult { task_id: u64, result: Vec<u8>, success: bool },
+    TaskResult {
+        task_id: u64,
+        result: Vec<u8>,
+        success: bool,
+    },
     /// Гласуване за консенсус
-    Vote { topic: String, value: bool, node_id: u64 },
+    Vote {
+        topic: String,
+        value: bool,
+        node_id: u64,
+    },
 }
 
 /// Mist Node - единица в разпределената система
@@ -225,9 +253,9 @@ pub struct MistNode {
 impl MistNode {
     pub fn new(level: HierarchyLevel) -> Self {
         let id = NODE_COUNTER.fetch_add(1, Ordering::SeqCst);
-        
+
         println!("🌐 [MIST] Created node {} at level {:?}", id, level);
-        
+
         Self {
             id,
             level,
@@ -242,7 +270,10 @@ impl MistNode {
     /// Свързва с друг нод
     pub fn connect(&self, neighbor_id: u64, level: HierarchyLevel) {
         self.neighbors.insert(neighbor_id, level);
-        println!("🔗 [MIST] Node {} connected to node {} ({:?})", self.id, neighbor_id, level);
+        println!(
+            "🔗 [MIST] Node {} connected to node {} ({:?})",
+            self.id, neighbor_id, level
+        );
     }
 
     /// Получава съобщение
@@ -255,27 +286,52 @@ impl MistNode {
         if let Some(msg) = self.message_queue.pop() {
             match &msg {
                 MistMessage::Heartbeat { node_id, timestamp } => {
-                    println!("💓 [MIST] Node {} received heartbeat from {} at {}", 
-                             self.id, node_id, timestamp);
+                    println!(
+                        "💓 [MIST] Node {} received heartbeat from {} at {}",
+                        self.id, node_id, timestamp
+                    );
                 }
-                MistMessage::StateSync { from_node, state_hash } => {
-                    println!("🔄 [MIST] Node {} syncing state from {} (hash: {:?})", 
-                             self.id, from_node, &state_hash[..4]);
+                MistMessage::StateSync {
+                    from_node,
+                    state_hash,
+                } => {
+                    println!(
+                        "🔄 [MIST] Node {} syncing state from {} (hash: {:?})",
+                        self.id,
+                        from_node,
+                        &state_hash[..4]
+                    );
                 }
-                MistMessage::Task { task_id, priority, .. } => {
-                    println!("📋 [MIST] Node {} processing task {} (priority: {})", 
-                             self.id, task_id, priority);
+                MistMessage::Task {
+                    task_id, priority, ..
+                } => {
+                    println!(
+                        "📋 [MIST] Node {} processing task {} (priority: {})",
+                        self.id, task_id, priority
+                    );
                     if let Ok(mut counter) = self.event_counter.write() {
                         counter.increment(self.id);
                     }
                 }
-                MistMessage::TaskResult { task_id, success, .. } => {
-                    println!("✅ [MIST] Node {} received result for task {}: {}", 
-                             self.id, task_id, if *success { "SUCCESS" } else { "FAILED" });
+                MistMessage::TaskResult {
+                    task_id, success, ..
+                } => {
+                    println!(
+                        "✅ [MIST] Node {} received result for task {}: {}",
+                        self.id,
+                        task_id,
+                        if *success { "SUCCESS" } else { "FAILED" }
+                    );
                 }
-                MistMessage::Vote { topic, value, node_id } => {
-                    println!("🗳️ [MIST] Node {} received vote on '{}': {} from {}", 
-                             self.id, topic, value, node_id);
+                MistMessage::Vote {
+                    topic,
+                    value,
+                    node_id,
+                } => {
+                    println!(
+                        "🗳️ [MIST] Node {} received vote on '{}': {} from {}",
+                        self.id, topic, value, node_id
+                    );
                 }
             }
             Some(msg)
@@ -300,7 +356,7 @@ impl MistNode {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos() as u64)
             .unwrap_or(0);
-        
+
         MistMessage::Heartbeat {
             node_id: self.id,
             timestamp,
@@ -339,10 +395,14 @@ impl MistSwarm {
         let node = Arc::new(MistNode::new(level));
         let id = node.id;
         self.nodes.insert(id, node);
-        
-        println!("🐝 [SWARM] Spawned node {} ({:?}). Total: {} nodes", 
-                 id, level, self.nodes.len());
-        
+
+        println!(
+            "🐝 [SWARM] Spawned node {} ({:?}). Total: {} nodes",
+            id,
+            level,
+            self.nodes.len()
+        );
+
         id
     }
 
@@ -396,23 +456,25 @@ impl MistSwarm {
         }
 
         let result = votes_for >= threshold;
-        println!("🗳️ [SWARM] Consensus on '{}': {} (for: {}, against: {}, threshold: {})", 
-                 topic, result, votes_for, votes_against, threshold);
-        
+        println!(
+            "🗳️ [SWARM] Consensus on '{}': {} (for: {}, against: {}, threshold: {})",
+            topic, result, votes_for, votes_against, threshold
+        );
+
         result
     }
 
     /// Създава фрактална йерархия
     pub fn create_fractal_hierarchy(&self, sensors: usize, edges: usize, gateways: usize) {
         println!("🏗️ [SWARM] Creating fractal hierarchy...");
-        
+
         // Създаваме Nexus (централен координатор)
         let nexus_id = self.spawn_node(HierarchyLevel::Nexus);
-        
+
         // Създаваме Cloud нодове
         let cloud_id = self.spawn_node(HierarchyLevel::Cloud);
         self.connect_nodes(nexus_id, cloud_id);
-        
+
         // Създаваме Gateway нодове
         let mut gateway_ids = Vec::new();
         for _ in 0..gateways {
@@ -420,7 +482,7 @@ impl MistSwarm {
             self.connect_nodes(cloud_id, gw_id);
             gateway_ids.push(gw_id);
         }
-        
+
         // Създаваме Edge нодове
         let mut edge_ids = Vec::new();
         for (i, _) in (0..edges).enumerate() {
@@ -429,14 +491,14 @@ impl MistSwarm {
             self.connect_nodes(gw_id, edge_id);
             edge_ids.push(edge_id);
         }
-        
+
         // Създаваме Sensor нодове
         for (i, _) in (0..sensors).enumerate() {
             let sensor_id = self.spawn_node(HierarchyLevel::Sensor);
             let edge_id = edge_ids[i % edge_ids.len()];
             self.connect_nodes(edge_id, sensor_id);
         }
-        
+
         println!("✅ [SWARM] Fractal hierarchy created: 1 Nexus, 1 Cloud, {} Gateways, {} Edges, {} Sensors",
                  gateways, edges, sensors);
     }
@@ -470,11 +532,11 @@ mod tests {
     #[test]
     fn test_lww_register() {
         let mut reg1 = LWWRegister::new("initial".to_string(), 1);
-        
+
         std::thread::sleep(std::time::Duration::from_millis(1));
-        
+
         let mut reg2 = LWWRegister::new("updated".to_string(), 2);
-        
+
         reg1.merge(&reg2);
         assert_eq!(reg1.get(), "updated");
     }
@@ -482,13 +544,13 @@ mod tests {
     #[test]
     fn test_or_set() {
         let mut set: ORSet<String> = ORSet::new();
-        
+
         set.add("apple".to_string(), 1);
         set.add("banana".to_string(), 2);
-        
+
         assert!(set.contains(&"apple".to_string()));
         assert!(set.contains(&"banana".to_string()));
-        
+
         set.remove(&"apple".to_string());
         assert!(!set.contains(&"apple".to_string()));
         assert!(set.contains(&"banana".to_string()));
@@ -497,21 +559,24 @@ mod tests {
     #[test]
     fn test_mist_swarm() {
         let swarm = MistSwarm::new();
-        
+
         let node1 = swarm.spawn_node(HierarchyLevel::Cloud);
         let node2 = swarm.spawn_node(HierarchyLevel::Edge);
-        
+
         swarm.connect_nodes(node1, node2);
-        
+
         // Изпращаме съобщение
-        swarm.send(node2, MistMessage::Task {
-            task_id: 1,
-            payload: vec![1, 2, 3],
-            priority: 5,
-        });
-        
+        swarm.send(
+            node2,
+            MistMessage::Task {
+                task_id: 1,
+                payload: vec![1, 2, 3],
+                priority: 5,
+            },
+        );
+
         swarm.tick();
-        
+
         assert_eq!(swarm.active_count(), 2);
     }
 
@@ -519,7 +584,7 @@ mod tests {
     fn test_fractal_hierarchy() {
         let swarm = MistSwarm::new();
         swarm.create_fractal_hierarchy(10, 3, 2);
-        
+
         // 1 Nexus + 1 Cloud + 2 Gateways + 3 Edges + 10 Sensors = 17
         assert_eq!(swarm.active_count(), 17);
     }

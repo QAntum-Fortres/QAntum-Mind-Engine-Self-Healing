@@ -4,7 +4,7 @@
 // PHASE: 2 - От синтаксис към намерение
 
 //! # Intent-Based Logic (Логика базирана на намерение)
-//! 
+//!
 //! Преход от императивно към цел-ориентирано програмиране.
 //! Вместо да казваме "как", дефинираме "какво" искаме да постигнем.
 //!
@@ -14,9 +14,9 @@
 //! - **Continuous Validation**: Непрекъснато сравняване с целевото състояние
 
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use serde::{Serialize, Deserialize};
 
 /// Тип на ограничение (Constraint)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -32,7 +32,10 @@ pub enum ConstraintType {
     /// Времево ограничение (в милисекунди)
     Temporal { max_latency_ms: u64 },
     /// Ресурсно ограничение
-    Resource { max_memory_mb: u64, max_cpu_percent: f64 },
+    Resource {
+        max_memory_mb: u64,
+        max_cpu_percent: f64,
+    },
 }
 
 /// Единично ограничение
@@ -104,7 +107,8 @@ impl IntentDefinition {
     }
 
     pub fn with_target(mut self, key: &str, value: &str) -> Self {
-        self.target_states.insert(key.to_string(), value.to_string());
+        self.target_states
+            .insert(key.to_string(), value.to_string());
         self
     }
 
@@ -185,7 +189,10 @@ impl IntentSynthesizer {
 
     /// Регистрира ново намерение
     pub fn register_intent(&self, intent: IntentDefinition) {
-        println!("🎯 [INTENT] Registering intent: {} - {}", intent.id, intent.description);
+        println!(
+            "🎯 [INTENT] Registering intent: {} - {}",
+            intent.id, intent.description
+        );
         self.intents.insert(intent.id.clone(), intent);
     }
 
@@ -193,19 +200,23 @@ impl IntentSynthesizer {
     pub fn update_state(&self, state: SystemState) {
         if let Ok(mut current) = self.current_state.write() {
             *current = state;
-            println!("📊 [INTENT] System state updated ({} values, {} metrics)", 
-                     current.values.len(), current.metrics.len());
+            println!(
+                "📊 [INTENT] System state updated ({} values, {} metrics)",
+                current.values.len(),
+                current.metrics.len()
+            );
         }
     }
 
     /// Валидира намерение спрямо текущото състояние
     pub fn validate_intent(&mut self, intent_id: &str) -> SovereignResult<ValidationResult> {
-        let intent = self.intents.get(intent_id)
-            .ok_or_else(|| SovereignError::EntropyDetected(
-                format!("Intent not found: {}", intent_id)
-            ))?;
+        let intent = self.intents.get(intent_id).ok_or_else(|| {
+            SovereignError::EntropyDetected(format!("Intent not found: {}", intent_id))
+        })?;
 
-        let current = self.current_state.read()
+        let current = self
+            .current_state
+            .read()
             .map_err(|e| SovereignError::EntropyDetected(e.to_string()))?;
 
         let mut violations = Vec::new();
@@ -220,7 +231,7 @@ impl IntentSynthesizer {
                 }
                 Some(actual_value) => {
                     violations.push(format!(
-                        "State mismatch: {} expected '{}', got '{}'", 
+                        "State mismatch: {} expected '{}', got '{}'",
                         key, target_value, actual_value
                     ));
                 }
@@ -245,8 +256,8 @@ impl IntentSynthesizer {
             1.0
         };
 
-        let satisfied = violations.is_empty() || 
-            (violations.iter().all(|v| !v.contains("required")) && completion_ratio >= 0.8);
+        let satisfied = violations.is_empty()
+            || (violations.iter().all(|v| !v.contains("required")) && completion_ratio >= 0.8);
 
         // Генерираме предложения за корекция
         let suggested_actions = self.generate_suggestions(&intent, &violations);
@@ -258,10 +269,15 @@ impl IntentSynthesizer {
             suggested_actions,
         };
 
-        self.validation_history.push((intent_id.to_string(), result.clone()));
+        self.validation_history
+            .push((intent_id.to_string(), result.clone()));
 
-        println!("✅ [INTENT] Validation for '{}': {:.1}% complete, {} violations", 
-                 intent_id, completion_ratio * 100.0, result.violations.len());
+        println!(
+            "✅ [INTENT] Validation for '{}': {:.1}% complete, {} violations",
+            intent_id,
+            completion_ratio * 100.0,
+            result.violations.len()
+        );
 
         Ok(result)
     }
@@ -269,36 +285,45 @@ impl IntentSynthesizer {
     /// Проверява единично ограничение
     fn check_constraint(&self, constraint: &Constraint, state: &SystemState) -> bool {
         match &constraint.constraint_type {
-            ConstraintType::Numeric { min, max } => {
-                state.metrics.get(&constraint.name)
-                    .map(|v| *v >= *min && *v <= *max)
-                    .unwrap_or(false)
-            }
-            ConstraintType::Boolean(expected) => {
-                state.values.get(&constraint.name)
-                    .map(|v| v.parse::<bool>().unwrap_or(false) == *expected)
-                    .unwrap_or(false)
-            }
-            ConstraintType::Enum(options) => {
-                state.values.get(&constraint.name)
-                    .map(|v| options.contains(v))
-                    .unwrap_or(false)
-            }
-            ConstraintType::Pattern(pattern) => {
-                state.values.get(&constraint.name)
-                    .and_then(|v| regex::Regex::new(pattern).ok().map(|r| r.is_match(v)))
-                    .unwrap_or(false)
-            }
+            ConstraintType::Numeric { min, max } => state
+                .metrics
+                .get(&constraint.name)
+                .map(|v| *v >= *min && *v <= *max)
+                .unwrap_or(false),
+            ConstraintType::Boolean(expected) => state
+                .values
+                .get(&constraint.name)
+                .map(|v| v.parse::<bool>().unwrap_or(false) == *expected)
+                .unwrap_or(false),
+            ConstraintType::Enum(options) => state
+                .values
+                .get(&constraint.name)
+                .map(|v| options.contains(v))
+                .unwrap_or(false),
+            ConstraintType::Pattern(pattern) => state
+                .values
+                .get(&constraint.name)
+                .and_then(|v| regex::Regex::new(pattern).ok().map(|r| r.is_match(v)))
+                .unwrap_or(false),
             ConstraintType::Temporal { max_latency_ms } => {
-                state.metrics.get(&format!("{}_latency", constraint.name))
+                state
+                    .metrics
+                    .get(&format!("{}_latency", constraint.name))
                     .map(|v| (*v as u64) <= *max_latency_ms)
                     .unwrap_or(true) // По подразбиране е ОК ако липсва метрика
             }
-            ConstraintType::Resource { max_memory_mb, max_cpu_percent } => {
-                let memory_ok = state.metrics.get("memory_mb")
+            ConstraintType::Resource {
+                max_memory_mb,
+                max_cpu_percent,
+            } => {
+                let memory_ok = state
+                    .metrics
+                    .get("memory_mb")
                     .map(|v| *v <= *max_memory_mb as f64)
                     .unwrap_or(true);
-                let cpu_ok = state.metrics.get("cpu_percent")
+                let cpu_ok = state
+                    .metrics
+                    .get("cpu_percent")
                     .map(|v| *v <= *max_cpu_percent)
                     .unwrap_or(true);
                 memory_ok && cpu_ok
@@ -307,7 +332,11 @@ impl IntentSynthesizer {
     }
 
     /// Генерира предложения за корекция
-    fn generate_suggestions(&self, intent: &IntentDefinition, violations: &[String]) -> Vec<String> {
+    fn generate_suggestions(
+        &self,
+        intent: &IntentDefinition,
+        violations: &[String],
+    ) -> Vec<String> {
         let mut suggestions = Vec::new();
 
         for violation in violations {
@@ -329,16 +358,26 @@ impl IntentSynthesizer {
     }
 
     /// Изпълнява непрекъснат цикъл на валидация
-    pub async fn continuous_validation_loop(&mut self, intent_id: &str, interval_ms: u64) -> SovereignResult<()> {
-        println!("🔄 [INTENT] Starting continuous validation for '{}'", intent_id);
-        
+    pub async fn continuous_validation_loop(
+        &mut self,
+        intent_id: &str,
+        interval_ms: u64,
+    ) -> SovereignResult<()> {
+        println!(
+            "🔄 [INTENT] Starting continuous validation for '{}'",
+            intent_id
+        );
+
         loop {
             match self.validate_intent(intent_id) {
                 Ok(result) => {
                     if result.satisfied {
                         println!("✨ [INTENT] Intent '{}' fully satisfied!", intent_id);
                     } else {
-                        println!("⚠️ [INTENT] Intent '{}' not satisfied. Actions needed:", intent_id);
+                        println!(
+                            "⚠️ [INTENT] Intent '{}' not satisfied. Actions needed:",
+                            intent_id
+                        );
                         for action in &result.suggested_actions {
                             println!("   → {}", action);
                         }
@@ -363,12 +402,18 @@ pub mod presets {
         IntentDefinition::new("high_availability", "Maintain system uptime above 99.9%")
             .with_target("status", "OPERATIONAL")
             .with_constraint(
-                Constraint::new("uptime", ConstraintType::Numeric { min: 99.9, max: 100.0 })
-                    .with_priority(100)
+                Constraint::new(
+                    "uptime",
+                    ConstraintType::Numeric {
+                        min: 99.9,
+                        max: 100.0,
+                    },
+                )
+                .with_priority(100),
             )
             .with_constraint(
                 Constraint::new("latency", ConstraintType::Temporal { max_latency_ms: 50 })
-                    .with_priority(90)
+                    .with_priority(90),
             )
             .with_action("failover_to_backup")
             .with_action("scale_horizontally")
@@ -380,8 +425,13 @@ pub mod presets {
             .with_target("encryption", "AES256")
             .with_target("protocol", "TLS1.3")
             .with_constraint(
-                Constraint::new("key_rotation", ConstraintType::Temporal { max_latency_ms: 86_400_000 })
-                    .with_priority(80)
+                Constraint::new(
+                    "key_rotation",
+                    ConstraintType::Temporal {
+                        max_latency_ms: 86_400_000,
+                    },
+                )
+                .with_priority(80),
             )
             .with_action("rotate_keys")
             .with_action("upgrade_cipher")
@@ -391,10 +441,14 @@ pub mod presets {
     pub fn minimal_footprint() -> IntentDefinition {
         IntentDefinition::new("minimal_footprint", "Minimize resource consumption")
             .with_constraint(
-                Constraint::new("resources", ConstraintType::Resource { 
-                    max_memory_mb: 512, 
-                    max_cpu_percent: 50.0 
-                }).with_priority(70)
+                Constraint::new(
+                    "resources",
+                    ConstraintType::Resource {
+                        max_memory_mb: 512,
+                        max_cpu_percent: 50.0,
+                    },
+                )
+                .with_priority(70),
             )
             .with_action("garbage_collect")
             .with_action("compress_data")
@@ -409,7 +463,13 @@ mod tests {
     fn test_intent_creation() {
         let intent = IntentDefinition::new("test", "Test intent")
             .with_target("status", "active")
-            .with_constraint(Constraint::new("latency", ConstraintType::Numeric { min: 0.0, max: 100.0 }));
+            .with_constraint(Constraint::new(
+                "latency",
+                ConstraintType::Numeric {
+                    min: 0.0,
+                    max: 100.0,
+                },
+            ));
 
         assert_eq!(intent.id, "test");
         assert_eq!(intent.target_states.len(), 1);
@@ -419,10 +479,9 @@ mod tests {
     #[test]
     fn test_validation() {
         let mut synthesizer = IntentSynthesizer::new();
-        
+
         // Регистрираме намерение
-        let intent = IntentDefinition::new("test", "Test")
-            .with_target("status", "ok");
+        let intent = IntentDefinition::new("test", "Test").with_target("status", "ok");
         synthesizer.register_intent(intent);
 
         // Състояние което удовлетворява намерението
@@ -438,9 +497,14 @@ mod tests {
     #[test]
     fn test_constraint_violation() {
         let mut synthesizer = IntentSynthesizer::new();
-        
-        let intent = IntentDefinition::new("test", "Test")
-            .with_constraint(Constraint::new("value", ConstraintType::Numeric { min: 0.0, max: 10.0 }));
+
+        let intent = IntentDefinition::new("test", "Test").with_constraint(Constraint::new(
+            "value",
+            ConstraintType::Numeric {
+                min: 0.0,
+                max: 10.0,
+            },
+        ));
         synthesizer.register_intent(intent);
 
         // Състояние което нарушава ограничението

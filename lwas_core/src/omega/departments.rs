@@ -11,7 +11,9 @@ pub trait Department: Send + Sync {
 pub struct IntelligenceDept;
 #[async_trait(?Send)]
 impl Department for IntelligenceDept {
-    fn name(&self) -> &str { "Intelligence" }
+    fn name(&self) -> &str {
+        "Intelligence"
+    }
     async fn initialize(&self) -> SovereignResult<()> {
         println!("🧠 [DEPT] Intelligence Node Online.");
         Ok(())
@@ -24,7 +26,9 @@ impl Department for IntelligenceDept {
 pub struct FortressDept;
 #[async_trait(?Send)]
 impl Department for FortressDept {
-    fn name(&self) -> &str { "Fortress" }
+    fn name(&self) -> &str {
+        "Fortress"
+    }
     async fn initialize(&self) -> SovereignResult<()> {
         println!("🛡️ [DEPT] Fortress Shield Entrenched.");
         Ok(())
@@ -41,10 +45,7 @@ pub struct DepartmentEngine {
 impl DepartmentEngine {
     pub fn new() -> Self {
         Self {
-            departments: vec![
-                Box::new(IntelligenceDept),
-                Box::new(FortressDept),
-            ],
+            departments: vec![Box::new(IntelligenceDept), Box::new(FortressDept)],
         }
     }
 

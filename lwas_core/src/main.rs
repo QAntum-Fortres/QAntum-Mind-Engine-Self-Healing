@@ -54,7 +54,7 @@ async fn main() -> SovereignResult<()> {
     // 2. Solana integration is stubbed in this build
     if let Ok(_priv_key_raw) = env::var("SOLANA_PRIVATE_KEY") {
         println!("📍 [SOLANA]: Solana integration is disabled in this polymorphic build.");
-        
+
         if let Ok(sol_price) = WealthBridge::get_real_sol_price().await {
             println!("💱 [SOL_PRICE]: ${:.2} USD (from Binance API)", sol_price);
         }
